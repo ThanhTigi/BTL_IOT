@@ -12,20 +12,24 @@ import Dust from '../dht11/dust';
 import Chartdobui from '../chartDobui/chartDobui';
 
 // Khai báo các biến hằng
-const urlLedOn = "https://i.imgur.com/imqSxdm.png";
-const urlLedOff = "https://i.imgur.com/OXXnlPH.png";
-const urlFanOn = "https://i.imgur.com/Wx2lXcJ.png";
-const urlFanOff = "https://i.imgur.com/ynfVzo0.png";
+const urlLedOn = "/light_on.jpg";
+const urlLedOff = "/light_off.jpg";
+const urlFanOn = "/fan_on.gif";
+const urlFanOff = "fan_off.png";
+const urlAirOn = "/air_on.gif";
+const urlAirOff = "air_off.png";
 
 const TOPIC_IOT_WEATHER = 'iot/weather';
-const TOPIC_IOT_LED_FAN = 'iot/ledFan';
+const TOPIC_IOT_LED_FAN_AIR = 'iot/ledFanAir';
 const TOPIC_CONTROL_LED = 'control/led';
 const TOPIC_CONTROL_FAN = 'control/fan';
+const TOPIC_CONTROL_AIR = 'control/air';
 
 const Page = () => {
     // Khởi tạo các trạng thái cho đèn và quạt
     const [isLedOn, setIsLedOn] = useState(false);
     const [isFanOn, setIsFanOn] = useState(false);
+    const [isAirOn, setIsAirOn] = useState(false);
 
     const [temperature, setTemperature] = useState(30); // Giả định nhiệt độ
     const [humidity, setHumidity] = useState(50); // Giả định độ ẩm
@@ -36,6 +40,7 @@ const Page = () => {
 
     const [turnOnLightCount, setTurnOnLightCount] = useState(0);
     const [turnOnFanCount, setTurnOnFanCount] = useState(0);
+    const [turnOnAirCount, setTurnOnAirCount] = useState(0);
 
 
     const client = mqtt.connect('wss://broker.hivemq.com:8884/mqtt'); // Tạo một MQTT client
@@ -43,7 +48,7 @@ const Page = () => {
     useEffect(() => {
         // Khi kết nối thành công, subscribe các topic
         client.subscribe(TOPIC_IOT_WEATHER);
-        client.subscribe(TOPIC_IOT_LED_FAN);
+        client.subscribe(TOPIC_IOT_LED_FAN_AIR);
 
         // Khi nhận được tin nhắn, cập nhật các trạng thái
         client.on('message', (topic, message) => {
@@ -64,8 +69,8 @@ const Page = () => {
                     postDataSensorToDatabase(datasub.temperature, datasub.humidity, datasub.light, datasub.dust);
                 }
             }
-            else if (topic === TOPIC_IOT_LED_FAN) {
-                if (datasub.led !== undefined && datasub.fan !== undefined) {
+            else if (topic === TOPIC_IOT_LED_FAN_AIR) {
+                if (datasub.led !== undefined && datasub.fan !== undefined && datasub.air !== undefined) {
                     if (datasub.led === 'on') {
                         setIsLedOn(true);
                     } else {
@@ -76,6 +81,11 @@ const Page = () => {
                     } else {
                         setIsFanOn(false);
                     }
+                    if (datasub.air === 'on') {
+                        setIsAirOn(true);
+                    } else {
+                        setIsAirOn(false);
+                    }
                 }
             }
         });
@@ -83,7 +93,7 @@ const Page = () => {
         // Khi destroy
         return () => {
             client.unsubscribe(TOPIC_IOT_WEATHER);
-            client.unsubscribe(TOPIC_IOT_LED_FAN);
+            client.unsubscribe(TOPIC_IOT_LED_FAN_AIR);
         };
     }, [client, temperature, humidity, light]);
 
@@ -157,12 +167,28 @@ const Page = () => {
         postLedFanToDatabase('Fan', message);
         console.log("Đã gửi tin nhắn " + message + " đến topic " + TOPIC_CONTROL_FAN);
 
-        // Nếu đèn được bật, tăng số lần bật đèn
+        // Nếu quạt được bật, tăng số lần bật quạt
         if (isFanOn) {
             setTurnOnFanCount((prevCount) => prevCount + 1);
         }
     }, [isFanOn]);
 
+    // Hàm bật/tắt điều hòa
+    const toggleAir = () => {
+        setIsAirOn(prevState => !prevState);
+    };
+    useEffect(() => {
+        // Gửi tin nhắn MQTT khi điều hòa được bật hoặc tắt
+        const message = isAirOn ? 'on' : 'off';
+        client.publish(TOPIC_CONTROL_AIR, message);
+        postLedFanToDatabase('Air', message);
+        console.log("Đã gửi tin nhắn " + message + " đến topic " + TOPIC_CONTROL_AIR);
+
+        // Nếu điều hòa được bật, tăng số lần bật điều hòa
+        if (isAirOn) {
+            setTurnOnAirCount((prevCount) => prevCount + 1);
+        }
+    }, [isAirOn]);
 
 
 
@@ -226,6 +252,17 @@ const Page = () => {
                                 <img className="btn-icon-den" src={isFanOn ? urlFanOn : urlFanOff} alt="Bulb" />
                                 <br />
                                 <button className={`light-btn ${isFanOn ? 'on' : 'off'}`} onClick={toggleFan}>
+                                    <span className="light-icon"></span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div className="page-btn-dieu-hoa">
+                            <div className="btn-icon">
+                                <p>Số lần bật điều hòa: {turnOnAirCount}</p>
+                                <img className="btn-icon-den" src={isAirOn ? urlAirOn : urlAirOff} alt="Bulb" />
+                                <br />
+                                <button className={`light-btn ${isAirOn ? 'on' : 'off'}`} onClick={toggleAir}>
                                     <span className="light-icon"></span>
                                 </button>
                             </div>

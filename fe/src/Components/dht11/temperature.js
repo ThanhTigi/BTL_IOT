@@ -1,18 +1,18 @@
 import React from 'react';
-import { WiDaySunny, WiCloudy, WiSnow } from 'react-icons/wi';
+import { WiThermometer, WiCloudy, WiSnow } from 'react-icons/wi';
 import './weather.css';
 
 function getWeatherInfo(temperature) {
   let weatherIcon, temperatureClass;
 
   if (temperature >= 35) {
-    weatherIcon = <WiDaySunny />;
+    weatherIcon = <WiThermometer />;
     temperatureClass = 'temp-hot';
   } else if (temperature >= 20) {
-    weatherIcon = <WiCloudy />;
+    weatherIcon = <WiThermometer />;
     temperatureClass = 'temp-normal';
   } else {
-    weatherIcon = <WiSnow />;
+    weatherIcon = <WiThermometer />;
     temperatureClass = 'temp-cold';
   }
 

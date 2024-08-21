@@ -26,37 +26,37 @@
 /*-----------------------------------*/
 
 .temp-hot {
-  background-image: linear-gradient(110deg, #fdde12d2 20%, #f75307f9 80%);
+  background-color: #ff5e00;
   color: #ffffff;
 }
 
 .temp-normal {
-  background-image: linear-gradient(110deg, #fdde12d2 20%, #f75307f9 80%);
+  background-color: #ffce65;
   color: #ffffff;
 }
 
 .temp-cold {
-  background-image: linear-gradient(110deg, #fdde12d2 20%, #f75307f9 80%);
+  background-color: #c9f2ff;
   color: #ffffff;
 }
 
 /*-----------------------------------*/
 
-/* Màu sắc cho các loại thời tiết */
+/* Màu sắc cho các loại độ ẩm */
 .hum-low {
-  background: linear-gradient(120deg, #3498db 20%, #0074a9 80%);
+  background-color: #93ddff;
   background-size: 100% 100%;
   color: #fff;
 }
 
 .hum-average {
-  background: linear-gradient(120deg, #3498db 20%, #0074a9 80%);
+  background-color: #4fc7ff;
   background-size: 100% 100%;
   color: #fff;
 }
 
 .hum-high {
-   background: linear-gradient(120deg, #3498db 20%, #0074a9 80%);
+  background-color: #00aeff;
   background-size: 100% 100%;
   color: #fff;
 }
@@ -65,25 +65,22 @@
 
 /* Màu sắc cho các loại thời tiết */
 .toi {
-  background-image: linear-gradient(109.6deg, #e5e5e57d 40%, #cdcdcd4e 90%);
+  background-color: #444000;
   color: #ffffff;
 }
 
 .hoitoi {
-  background-image: linear-gradient(109.6deg, #e5e5e57d 40%, #cdcdcd4e 90%);
+  background-color: #978d00;
   color: #ffffffb5;
-  /* Màu chữ đen */
 }
 
 .sang {
-  /* background-image: linear-gradient(109.6deg, rgba(156, 252, 248, 1) 11.2%, rgba(110, 123, 251, 1) 91.1%); */
-  background-image: linear-gradient(109.6deg, #e5e5e57d 40%, #cdcdcd4e 90%);
+  background-color: #cec000;
   color: #ffffff;
-  /* Màu chữ trắng */
 }
 
 .ratsang {
-  background-image: linear-gradient(109.6deg, #ffffff65 10%, #e4e4e460 90%);
+  background-color: #ffee00;
   color: #ffffff;
   /* Màu chữ trắng */
 }

@@ -3,11 +3,11 @@ import { WiHorizonAlt } from 'react-icons/wi';
 import './weather.css';
 
 function getLightClass(light) {
-  if (light <= 200) {
+  if (light <= 50) {
     return 'toi';
-  } else if (light <= 500) {
+  } else if (light <= 200) {
     return 'hoitoi';
-  } else if (light <= 800) {
+  } else if (light <= 500) {
     return 'sang';
   } else {
     return 'ratsang';

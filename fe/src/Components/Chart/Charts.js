@@ -92,19 +92,19 @@ function Chart(props) {
             {
                 label: 'Nhiệt độ (°C)',
                 data: data.temperature,
-                borderColor: 'red',
+                borderColor: '#ff6c03',
                 fill: false,
             },
             {
                 label: 'Độ ẩm (%)',
                 data: data.humidity,
-                borderColor: 'blue',
+                borderColor: '#00d9ff',
                 fill: false,
             },
             {
                 label: 'Ánh sáng (lux)',
                 data: data.light,
-                borderColor: 'green',
+                borderColor: '#b5b800',
                 fill: false,
             },
         ],
@@ -135,7 +135,7 @@ function Chart(props) {
 
     return (
         <div>
-            <Line data={chartData} options={chartOptions} height={300} width={600} />
+            <Line data={chartData} options={chartOptions} height={300} width={420} />
         </div>
     );
 }

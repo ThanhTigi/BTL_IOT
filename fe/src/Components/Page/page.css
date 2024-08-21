@@ -1,12 +1,12 @@
 .pagee {
-  height: 657px;
+  height: 1000px;
   /* padding: 50px; */
   width: 100%;
   padding-top: 50px;
   background-image: linear-gradient(
     109.6deg,
-    rgba(156, 252, 248, 1) 11.2%,
-    rgba(110, 123, 251, 1) 91.1%
+    rgb(4, 113, 163) 11.2%,
+    #29485c 91.1%
   );
 }
 
@@ -44,11 +44,12 @@
 
 .page-bieudo {
   display: inline;
-  width: 62.3%;
+  width: 61.3%;
+  height: 700px;
   background-color: #f2e9e8;
   transform: translateZ(50px); /* Dịch phần tử lên theo trục Z */
   box-shadow: 0 0 20px rgba(0, 0, 0, 0.5); /* Đổ bóng */
-  margin: 10px 10px;
+  margin: 18px 10px;
 }
 
 .page-btn-chucnang {
@@ -57,13 +58,13 @@
 }
 
 .page-btn-den,
-.page-btn-quat {
+.page-btn-quat,
+.page-btn-dieu-hoa {
   height: 230px;
   background-image: linear-gradient(
     to right,
-    #feac5e 0%,
-    #c779d0,
-    #4bc0c8 100%
+    #77E4C8 0%,
+    #36C2CE 100%
   );
   border-radius: 20px;
   transform: translateZ(50px);
