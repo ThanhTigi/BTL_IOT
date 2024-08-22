@@ -16,29 +16,33 @@ function DataLedFan() {
     const [isValidFormat, setIsValidFormat] = useState(true);
     const rowsPerPage = 20;
 
+    // Fake data tạm thời cho lịch sử bật tắt đèn và quạt
+    const fakeData = Array.from({ length: 100 }, (_, index) => ({
+        id: index + 1,
+        name: index % 2 === 0 ? 'Light' : 'Fan', // Tên thiết bị là 'Light' hoặc 'Fan'
+        status: Math.random() > 0.5 ? 'On' : 'Off', // Trạng thái ngẫu nhiên bật hoặc tắt
+        date: moment().subtract(Math.random() * 100, 'days').format('YYYY-MM-DD HH:mm:ss'), // Thời gian ngẫu nhiên trong 100 ngày qua
+    }));
+
     useEffect(() => {
-        // Gửi yêu cầu API và lấy dữ liệu
-        fetch(`http://localhost:8080/${searchClicked ? `searchfanlight?startTime=${thoigian} 00:00:00&endTime=${thoigian} 23:59:59` : `fanlights`}`) // Thay thế URL_API_CUBAN bằng URL API thực tếA_
-            .then((response) => response.json())
-            .then((data) => {
-                data.forEach((item) => {
-                    item.thoigian = moment(item.thoigian).format('YYYY-MM-DD HH:mm:ss');
-                });
+        function callapi() {
+            // Khi chưa có API, sử dụng dữ liệu fake
+            let data = fakeData;
 
-                const totalPages = Math.ceil(data.length / rowsPerPage);
-                setTotalPages(totalPages);
+            // Tính tổng số trang
+            const totalPages = Math.ceil(data.length / rowsPerPage);
+            setTotalPages(totalPages);
 
-                // Cắt lát dữ liệu dựa trên trang hiện tại và rowsPerPage
-                const startIndex = (currentPage - 1) * rowsPerPage;
-                const endIndex = startIndex + rowsPerPage;
-                const slicedData = data.slice(startIndex, endIndex);
-                setInputPage(currentPage.toString()); // Chuyển currentPage thành chuỗi
-                setHistoryfanlight(slicedData);
-            })
-            .catch((error) => {
-                console.error('Lỗi khi gửi yêu cầu API:', error);
-            });
-    }, [currentPage, searchClicked, thoigiandata]);
+            // Cắt lát dữ liệu dựa trên trang hiện tại và rowsPerPage
+            const startIndex = (currentPage - 1) * rowsPerPage;
+            const endIndex = startIndex + rowsPerPage;
+            const slicedData = data.slice(startIndex, endIndex);
+            setInputPage(currentPage.toString()); // Chuyển currentPage thành chuỗi
+            setHistoryfanlight(slicedData);
+        }
+
+        callapi();
+    }, [currentPage]);
 
     const handlePageInputChange = (e) => {
         setTempInputPage(e.target.value); // Cập nhật giá trị tạm thời
@@ -50,10 +54,10 @@ function DataLedFan() {
             if (newPage >= 1 && newPage <= totalPages) {
                 setCurrentPage(newPage);
                 setTempInputPage('');
-                setTempInputPage('')
             }
         }
     };
+
     const handleSearch = () => {
         if (thoigian !== '') {
             if (isValidDateFormat(thoigian)) {
@@ -70,44 +74,33 @@ function DataLedFan() {
         }
         setCurrentPage(1);
     };
+
     const handleExit = () => {
         setCurrentPage(1);
         setSearchClicked(false);
         setIsValidFormat(true);
         setThoigian('');
     };
+
     function isValidDateFormat(input) {
         // Sử dụng regex để kiểm tra định dạng
         const dateFormat = /^\d{4}-\d{2}-\d{2}$/;
         return dateFormat.test(input);
     }
+
     const handlePageInputSearch = (e) => {
         if (e.key === 'Enter') {
             handleSearch();
         }
-    }
+    };
+
     return (
         <div>
             <div className="menuu">
                 <Menu />
             </div>
             <div className='container-data'>
-                <h1>Lịch sử bật tắt đèn </h1>
-                {/* <div className='search-khung'>
-                    {!isValidFormat && (
-                        <div className='valueDateIp'> Nhập theo định dạng YYYY-MM-DD.</div>
-                    )}
-                    <input
-                        className='search-ip'
-                        type="text"
-                        placeholder="Nhập thời gian (YYYY-MM-DD HH:mm:ss)"
-                        value={thoigian}
-                        onChange={(e) => { setThoigian(e.target.value); }}
-                        onKeyPress={handlePageInputSearch}
-                    />
-                    <button className='btn-exit btn-exit-search bi bi-search' onClick={() => handleSearch()}> Search</button>
-                    <button className='btn-exit btn-exit-exit bi bi-x-circle-fill' onClick={() => handleExit()}> Exit</button>
-                </div> */}
+                <h1>Lịch sử bật tắt đèn và quạt</h1>
 
                 {historyfanlight && (
                     <table>
@@ -122,38 +115,33 @@ function DataLedFan() {
                         <tbody>
                             {
                                 historyfanlight.map((data) => {
-                                    const isOn = data.status === "On" || data.status === "on";
+                                    const isOn = data.status === "On";
                                     const rowClass = isOn ? "green-row" : "red-row";
                                     return (
-
-                                        <tr className={rowClass}>
+                                        <tr className={rowClass} key={data.id}>
                                             <td>{data.id}</td>
                                             <td>{data.name}</td>
                                             <td>{data.status}</td>
                                             <td>{data.date}</td>
                                         </tr>
-
-                                    )
+                                    );
                                 })
-                            }</tbody>
+                            }
+                        </tbody>
                     </table>
                 )}
+
                 <div className="pagination">
                     <button className='btn-truoc' onClick={() => setCurrentPage(currentPage - 1)} disabled={currentPage === 1}>
                         Trước
                     </button>
-                    {/* <span> */}
                     <input
                         className='ip-trang'
-                        // type="number"
                         value={tempInputPage}
                         onChange={handlePageInputChange}
                         onKeyPress={handlePageInputEnter}
-                        min={1}
-                        max={totalPages}
                         placeholder={inputPage + "/" + totalPages}
                     />
-                    {/* </span> */}
                     <button className='btn-tiep' onClick={() => setCurrentPage(currentPage + 1)} disabled={currentPage === totalPages}>
                         Tiếp
                     </button>
@@ -162,4 +150,5 @@ function DataLedFan() {
         </div>
     );
 }
+
 export default DataLedFan;

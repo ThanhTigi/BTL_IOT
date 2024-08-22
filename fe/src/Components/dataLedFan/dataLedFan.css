@@ -14,13 +14,13 @@
 }
 
 .green-row {
-  background-color: rgb(24, 209, 24);
+  background-color: rgb(12, 139, 12);
   color: rgb(0, 0, 0); /* Màu chữ trắng để tốt hơn */
 }
 
 /* Màu đỏ cho trạng thái "off" */
 .red-row {
-  background-color: rgb(227, 36, 36);
+  background-color: rgb(170, 37, 37);
   color: rgb(0, 0, 0); /* Màu chữ trắng để tốt hơn */
 }
 

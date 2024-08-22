@@ -26,16 +26,16 @@ const Menu = () => {
               <Link to="/" className="linkmenu" >
                 <button className='ulLink bi bi-house-door-fill'> Home </button>
               </Link>
-              <Link to="/Myprofile" className="linkmenu" >
-                <button className='ulLink bi bi-person-circle'> My Profile
-                </button>
-              </Link>
               <Link to="/DataSensor" className="linkmenu" >
                 <button className='ulLink bi bi-database'> Dữ liệu cảm biến
                 </button>
               </Link>
               <Link to="/DataLedFan" className="linkmenu" >
                 <button className='ulLink bi bi-clock-history'> Lịch sử bật tắt
+                </button>
+              </Link>
+              <Link to="/Myprofile" className="linkmenu" >
+                <button className='ulLink bi bi-person-circle'> My Profile
                 </button>
               </Link>
             </ul>
