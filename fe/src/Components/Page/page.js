@@ -31,9 +31,9 @@ const Page = () => {
     const [isFanOn, setIsFanOn] = useState(false);
     const [isAirOn, setIsAirOn] = useState(false);
 
-    const [temperature, setTemperature] = useState(30); // Giả định nhiệt độ
-    const [humidity, setHumidity] = useState(50); // Giả định độ ẩm
-    const [light, setLight] = useState(100); // Giả định độ sáng
+    const [temperature, setTemperature] = useState(50); // Giả định nhiệt độ
+    const [humidity, setHumidity] = useState(90); // Giả định độ ẩm
+    const [light, setLight] = useState(1000); // Giả định độ sáng
     const [dust, setDust] = useState(60);
 
     const [isUpload, setIsUpload] = useState(false);

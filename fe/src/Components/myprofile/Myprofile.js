@@ -1,5 +1,9 @@
-import "./myprofile.css"
-import Menu from "../menu/menu";
+import React from 'react';
+import './myprofile.css';
+import Menu from '../menu/menu';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faUser, faIdCard, faUsers } from '@fortawesome/free-solid-svg-icons';
+import { faGithub } from '@fortawesome/free-brands-svg-icons';
 
 const Myprofile = () => {
     return (
@@ -7,11 +11,25 @@ const Myprofile = () => {
             <div className="menuu">
                 <Menu />
             </div>
-            <img className="imgavt" src="/anh.jpg"></img>
-            <div className="mythongtin">Họ tên: Nguyễn Đắc Thành</div>
-            <div className="mythongtin">MSV: B21DCCN678 </div>
-            <div className="mythongtin">Lớp: D21CQCN06-B </div>
+            <img className="imgavt" src="/anh.jpg" alt="Avatar" />
+            <div className="mythongtin">
+                <FontAwesomeIcon icon={faUser} className="icon" />
+                Họ tên: Nguyễn Đắc Thành
+            </div>
+            <div className="mythongtin">
+                <FontAwesomeIcon icon={faIdCard} className="icon" />
+                MSV: B21DCCN678
+            </div>
+            <div className="mythongtin">
+                <FontAwesomeIcon icon={faUsers} className="icon" />
+                Lớp: D21CQCN06-B
+            </div>
+            <div className="mythongtin">
+                <FontAwesomeIcon icon={faGithub} className="icon" />
+                Github: <a href="https://github.com/ThanhTigi/BTL_IOT" target="_blank" rel="noopener noreferrer">https://github.com/ThanhTigi/BTL_IOT</a>
+            </div>
         </div>
-    )
+    );
 }
+
 export default Myprofile;

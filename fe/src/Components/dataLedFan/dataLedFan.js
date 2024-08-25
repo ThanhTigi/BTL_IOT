@@ -19,7 +19,7 @@ function DataLedFan() {
     // Fake data tạm thời cho lịch sử bật tắt đèn và quạt
     const fakeData = Array.from({ length: 100 }, (_, index) => ({
         id: index + 1,
-        name: index % 2 === 0 ? 'Light' : 'Fan', // Tên thiết bị là 'Light' hoặc 'Fan'
+        name: index % 3 === 0 ? 'Light' : index % 3 == 1 ? 'Fan' : 'Air Conditioner', // Tên thiết bị là 'Light' hoặc 'Fan' hoặc 'Air Conditioner'
         status: Math.random() > 0.5 ? 'On' : 'Off', // Trạng thái ngẫu nhiên bật hoặc tắt
         date: moment().subtract(Math.random() * 100, 'days').format('YYYY-MM-DD HH:mm:ss'), // Thời gian ngẫu nhiên trong 100 ngày qua
     }));
@@ -100,7 +100,7 @@ function DataLedFan() {
                 <Menu />
             </div>
             <div className='container-data'>
-                <h1>Lịch sử bật tắt đèn và quạt</h1>
+                <h1>Lịch sử bật tắt thiết bị</h1>
 
                 {historyfanlight && (
                     <table>
@@ -141,6 +141,7 @@ function DataLedFan() {
                         onChange={handlePageInputChange}
                         onKeyPress={handlePageInputEnter}
                         placeholder={inputPage + "/" + totalPages}
+                        disabled = {true}
                     />
                     <button className='btn-tiep' onClick={() => setCurrentPage(currentPage + 1)} disabled={currentPage === totalPages}>
                         Tiếp

@@ -179,6 +179,7 @@ function DataSensor() {
                         onChange={handlePageInputChange}
                         onKeyPress={handlePageInputEnter}
                         placeholder={inputPage + "/" + totalPages}
+                        disabled = {true}
                     />
                     <button className='btn-tiep' onClick={() => setCurrentPage(currentPage + 1)} disabled={currentPage === totalPages}>
                         Tiếp
