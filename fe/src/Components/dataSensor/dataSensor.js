@@ -135,8 +135,8 @@ function DataSensor() {
                         onChange={(e) => setLightInput(e.target.value)}
                         onKeyPress={handlePageSearchEnter}
                     />
-                    <button className='btn-exit btn-exit-search bi bi-search' onClick={() => handleSearch()}> Search</button>
-                    <button className='btn-exit btn-exit-exit bi bi-card-list' onClick={() => handleExit()}> All</button>
+                    <button className='btn-exit btn-exit-search bi bi-search' onClick={() => handleSearch()}> Tìm kiếm</button>
+                    <button className='btn-exit btn-exit-exit bi bi-card-list' onClick={() => handleExit()}> Tất cả</button>
                 </div>
 
                 {listDataSensor && (

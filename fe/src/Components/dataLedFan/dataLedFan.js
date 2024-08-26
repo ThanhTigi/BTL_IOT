@@ -19,8 +19,8 @@ function DataLedFan() {
     // Fake data tạm thời cho lịch sử bật tắt đèn và quạt
     const fakeData = Array.from({ length: 100 }, (_, index) => ({
         id: index + 1,
-        name: index % 3 === 0 ? 'Light' : index % 3 == 1 ? 'Fan' : 'Air Conditioner', // Tên thiết bị là 'Light' hoặc 'Fan' hoặc 'Air Conditioner'
-        status: Math.random() > 0.5 ? 'On' : 'Off', // Trạng thái ngẫu nhiên bật hoặc tắt
+        name: index % 3 === 0 ? 'Đèn' : index % 3 == 1 ? 'Quạt' : 'Điều hòa', // Tên thiết bị là 'Light' hoặc 'Fan' hoặc 'Air Conditioner'
+        status: Math.random() > 0.5 ? 'Bật' : 'Tắt', // Trạng thái ngẫu nhiên bật hoặc tắt
         date: moment().subtract(Math.random() * 100, 'days').format('YYYY-MM-DD HH:mm:ss'), // Thời gian ngẫu nhiên trong 100 ngày qua
     }));
 
@@ -115,7 +115,7 @@ function DataLedFan() {
                         <tbody>
                             {
                                 historyfanlight.map((data) => {
-                                    const isOn = data.status === "On";
+                                    const isOn = data.status === "Bật";
                                     const rowClass = isOn ? "green-row" : "red-row";
                                     return (
                                         <tr className={rowClass} key={data.id}>
