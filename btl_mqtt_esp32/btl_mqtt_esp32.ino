@@ -1,65 +1,99 @@
-#include <DHT.h>
 #include <WiFi.h>
-#include <ArduinoJson.h>
 #include <PubSubClient.h>
+#include "DHT.h"
 
-#define LED_PIN 22
-#define FAN_PIN 23
-#define LIGHT_PIN 34
-#define DHT_PIN 14
-#define DHTTYPE DHT11
+#define dhtpin 25
+#define dhttype DHT11
+DHT dht(dhtpin, dhttype);
 
-// WiFi
-const char *ssid = "Hùng";          // Enter your WiFi name
-const char *password = "12345678";  // Enter WiFi password
+#define LDR_PIN 32  // Chân ADC để đọc tín hiệu từ LDR
 
-// MQTT Broker
+#define FAN_PIN 4    // LED đại diện cho quạt
+#define AC_PIN 5    // LED đại diện cho điều hòa
+#define LIGHT_PIN 2   // LED đại diện cho đèn
+
+
+// Thông tin mạng WiFi
+const char* ssid = "P603-2.4Ghz";
+const char* password = "hoilamgi";
+
+// MQTT Server
 const char *mqtt_broker = "broker.hivemq.com";
 const int mqtt_port = 1883;
-
-// Topic
-const char *topicIotWeather = "iot/weather";
-const char *topicIotLedFan = "iot/ledFan";
-const char *topicControlLed = "control/led";
-const char *topicControlFan = "control/fan";
+const char* mqtt_user = "thanh";  // Username MQTT
+const char* mqtt_pass = "678";  // Password MQTT
+const char* mqtt_sensor_topic = "home/sensor/data";
+const char* mqtt_status_topic = "home/device/status";
+const char* TOPIC_CONTROL_LED = "control/led";
+const char* TOPIC_CONTROL_FAN = "control/fan";
+const char* TOPIC_CONTROL_AIR = "control/air";
 
 WiFiClient espClient;
 PubSubClient client(espClient);
-DHT dht(DHT_PIN, DHTTYPE);
-bool isConnected;
 
+// Hàm xử lý lệnh từ MQTT
+void callback(char* topic, byte* payload, unsigned int length) {
+  Serial.print("topic: ");
+  Serial.print(topic);
+  String message;
+  for (int i = 0; i < length; i++) {
+    message += (char)payload[i];
+  }
+
+  if (String(topic) == TOPIC_CONTROL_LED) {
+    // Điều khiển đèn từ MQTT
+    if (message == "Bật") {
+      digitalWrite(LIGHT_PIN, HIGH);  // Bật đèn
+      client.publish(mqtt_status_topic, "light_on_success");
+    } else if (message == "Tắt") {
+      digitalWrite(LIGHT_PIN, LOW);  // Tắt đèn
+      client.publish(mqtt_status_topic, "light_off_success");
+    } 
+  }
+  else if (String(topic) == TOPIC_CONTROL_FAN) {
+    // Điều khiển quạt từ MQTT
+    if (message == "Bật") {
+      digitalWrite(FAN_PIN, HIGH);  // Bật quạt
+      client.publish(mqtt_status_topic, "fan_on_success");
+    } else if (message == "Tắt") {
+      digitalWrite(FAN_PIN, LOW);  // Tắt quạt
+      client.publish(mqtt_status_topic, "fan_off_success");
+    } 
+  }
+  else if (String(topic) == TOPIC_CONTROL_AIR) {
+    // Điều khiển điều hòa từ MQTT
+    if (message == "Bật") {
+      digitalWrite(AC_PIN, HIGH);  // Bật điều hòa
+      client.publish(mqtt_status_topic, "air_on_success");
+    } else if (message == "Tắt") {
+      digitalWrite(AC_PIN, LOW);  // Tắt điều hòa
+      client.publish(mqtt_status_topic, "air_ff_success");
+    } 
+  }
+}
 
 void setup() {
-
-  Serial.begin(115200);  // Set software serial baud to 115200;
+  Serial.begin(9600);
   dht.begin();
 
-  // Connecting to a WiFi network
+  // Cấu hình chân xuất ra cho 3 thiết bị
+  pinMode(FAN_PIN, OUTPUT);
+  pinMode(AC_PIN, OUTPUT);
+  pinMode(LIGHT_PIN, OUTPUT);
+
+  // Kết nối WiFi
   WiFi.begin(ssid, password);
   while (WiFi.status() != WL_CONNECTED) {
-    delay(500);
-    Serial.println("Connecting to WiFi...");
+    delay(1000);
+    Serial.println("Dang ket noi den WiFi...");
   }
-  Serial.println("Connected to the WiFi network");
-  Serial.println("***************");
+  Serial.println("Da ket noi WiFi");
 
-
-  // Turn off the LED initially
-  pinMode(LED_PIN, OUTPUT);
-  digitalWrite(LED_PIN, LOW);
-
-  // Turn off the FAN initially
-  pinMode(FAN_PIN, OUTPUT);
-  digitalWrite(FAN_PIN, LOW);
-
-
-
-  // Connecting to an MQTT broker
+  // Kết nối đến MQTT Broker
   client.setServer(mqtt_broker, mqtt_port);
   client.setCallback(callback);
-
   while (!client.connected()) {
-    String client_id = "esp8266-client-";
+    String client_id = "esp32-client-";
     client_id += String(WiFi.macAddress());
     Serial.printf("The client %s connects to the public MQTT broker\n", client_id.c_str());
 
@@ -72,113 +106,30 @@ void setup() {
       delay(2000);
     }
   }
-
-  // Subscribe topics
-  Serial.println("Client subcribe topics...");
-  client.subscribe(topicControlLed);
-  client.subscribe(topicControlFan);
-
-  /*--------------------------------------------------*/
-
-
-
-  // Khởi tạo cảm biến DHT11
-  // dht.begin();
+  client.subscribe(TOPIC_CONTROL_LED);  
+      client.subscribe(TOPIC_CONTROL_FAN); 
+      client.subscribe(TOPIC_CONTROL_AIR); 
 }
-
-
-
-void callback(char *topic, byte *payload, unsigned int length) {
-  Serial.print("Received topic: ");
-  Serial.print(topic);
-  Serial.print(" | message: ");
-
-  String message;
-  for (int i = 0; i < length; i++) {
-    message += (char)payload[i];  // Convert byte to string
-  }
-  Serial.println(message);
-
-  // topic control led
-  if (String(topic) == String(topicControlLed)) {
-    int ledState = digitalRead(LED_PIN);
-    if (ledState == LOW && message == "on") {
-      digitalWrite(LED_PIN, HIGH);
-    } else if (ledState == HIGH && message == "off") {
-      digitalWrite(LED_PIN, LOW);
-    }
-  }
-  // topic control fan
-  else if (String(topic) == String(topicControlFan)) {
-    int fanState = digitalRead(FAN_PIN);
-    if (fanState == LOW && message == "on") {
-      digitalWrite(FAN_PIN, HIGH);
-    } else if (fanState == HIGH && message == "off") {
-      digitalWrite(FAN_PIN, LOW);
-    }
-  }
-  Serial.println("-----------------------");
-}
-
-
 
 void loop() {
-  // Đọc nhiệt độ, độ ẩm, ánh sáng
-  float temperature = dht.readTemperature();
+  client.loop();  // Lắng nghe lệnh từ MQTT
+  // Đọc dữ liệu cảm biến DHT11 và LDR
   float humidity = dht.readHumidity();
-  float light = analogRead(LIGHT_PIN);
-  // float light = random(100, 1000);
-  float dust = random(1, 100);
-
-  if (isnan(temperature) || isnan(humidity)) {
-    // Serial.println("--- Weather is nan ---");
-    temperature = 30;
-    humidity = 60;
-    // return;
+  float temperature = dht.readTemperature();
+  int sensorValue = analogRead(LDR_PIN);  
+  float voltage = sensorValue * (3.3 / 4095.0);  // Chuyển đổi giá trị ADC sang điện áp (0 - 3.3V)
+  float lux = (2500 / voltage - 500) / 3.3;  // Công thức chuyển đổi gần đúng từ điện áp sang lux
+  if (lux > 200000) {
+    lux = 200000;
   }
+  float light = lux;
 
-  // Chuyển dữ liệu sang chuỗi để publish qua json
-  String temperature_payload = String(int(temperature));
-  String humidity_payload = String(int(humidity));
-  String light_payload = String(int(light));
-  String dust_payload = String(int(dust));
+  // Chuẩn bị dữ liệu dưới dạng JSON
+  String jsonData = "{\"temperature\": " + String(temperature) + 
+                    ", \"humidity\": " + String(humidity) + 
+                    ", \"light\": " + String(light) + "}";
 
-  // Thêm dữ liệu vào JSON
-  StaticJsonDocument<200> weatherJson;
-  weatherJson["temperature"] = temperature_payload;
-  weatherJson["humidity"] = humidity_payload;
-  weatherJson["light"] = light_payload;
-  weatherJson["dust"] = dust_payload;
-
-  // Chuyển đổi JSON thành chuỗi và gửi lên MQTT
-  char weatherJsonStr[200];
-  serializeJson(weatherJson, weatherJsonStr);
-  client.publish(topicIotWeather, weatherJsonStr);
-
-  // Debug
-  Serial.print("Send topic: ");
-  Serial.print(topicIotWeather);
-  Serial.print(" , message: ");
-  Serial.println(weatherJsonStr);
-
-  // // Lấy trạng thái hiện tại của led, fan
-  // int ledState = digitalRead(LED_PIN);
-  // int fanState = digitalRead(FAN_PIN);
-
-  // String ledState_payload = (ledState == HIGH) ? "on" : "off";
-  // String fanState_payload = (fanState == HIGH) ? "on" : "off";
-
-  // // Thêm dữ liệu vào JSON
-  // StaticJsonDocument<200> ledFanJson;
-  // ledFanJson["led"] = ledState_payload;
-  // ledFanJson["fan"] = fanState_payload;
-
-  // // Chuyển đổi JSON thành chuỗi và gửi lên MQTT
-  // char ledFanJsonStr[200];
-  // serializeJson(ledFanJson, ledFanJsonStr);
-  // client.publish(topicLedFan, ledFanJsonStr);
-
-  // Đảm bảo duy trì kết nối MQTT
-  client.loop();
-  delay(2000);
+  // Gửi dữ liệu cảm biến qua MQTT
+  client.publish(mqtt_sensor_topic, jsonData.c_str());
+  delay(5000);  // Gửi dữ liệu mỗi 30 giây
 }

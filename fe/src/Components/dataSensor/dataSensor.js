@@ -1,9 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import moment from 'moment';
+import mqtt from 'precompiled-mqtt'
+import axios from 'axios'
 import Menu from '../menu/menu';
-import './dataSensor.css';
+import './dataSensor.css'
 
 function DataSensor() {
+
+    const client = mqtt.connect("wss://broker.hivemq.com:8884/mqtt");
+    const TOPIC_IOT_WEATHER = 'iot/weather';
 
     const [listDataSensor, setListDataSensor] = useState(null);
 
@@ -22,44 +27,51 @@ function DataSensor() {
     const [light, setLight] = useState(''); // Thêm trường nhập ánh sáng
 
     const [searchClicked, setSearchClicked] = useState(false);
+    const [isUpload, setIsUpload] = useState(false);
     const [isClear, setIsClear] = useState(false);
 
     const rowsPerPage = 20;
 
-    // Fake data tạm thời
-    const fakeData = Array.from({ length: 100 }, (_, index) => ({
-        id: index + 1,
-        temperature: (Math.random() * 40).toFixed(2), // Nhiệt độ ngẫu nhiên từ 0 đến 40°C
-        humidity: (Math.random() * 100).toFixed(2), // Độ ẩm ngẫu nhiên từ 0 đến 100%
-        light: (Math.random() * 1000).toFixed(2), // Ánh sáng ngẫu nhiên từ 0 đến 1000 lux
-        date: moment().format('YYYY-MM-DD HH:mm:ss'), // Thời gian hiện tại
-    }));
-
     useEffect(() => {
+        // Gửi yêu cầu API và lấy dữ liệu
         function callapi() {
-            // Khi chưa có API, sử dụng dữ liệu fake
-            let data = fakeData;
+            fetch(`http://localhost:8080/${searchClicked ? `search-sensor?temperature=${temperatureInput}&humidity=${humidityInput}&light=${lightInput}` : `sensors`}`)
+                .then((response) => response.json())
+                .then((data) => {
+                    data.forEach((item) => {
+                        item.date = moment(item.date).format('YYYY-MM-DD HH:mm:ss');
+                    });
 
-            // Thực hiện tìm kiếm nếu searchClicked = true
-            if (searchClicked) {
-                data = fakeData.filter((item) => {
-                    const tempMatches = temperature ? Math.round(item.temperature) === parseInt(temperature) : true;
-                    const humidityMatches = humidity ? Math.round(item.humidity) === parseInt(humidity) : true;
-                    const lightMatches = light ? Math.round(item.light) === parseInt(light) : true;
-                    return tempMatches && humidityMatches && lightMatches;
+                    setTotalPages(Math.ceil(data.length / rowsPerPage)); // Tính tổng số trang
+                    const startIndex = (currentPage - 1) * rowsPerPage;
+                    const endIndex = startIndex + rowsPerPage;
+                    const slicedData = data.slice(startIndex, endIndex);
+                    setInputPage(currentPage.toString()); // Chuyển currentPage thành chuỗi
+                    setListDataSensor(slicedData);
+                })
+                .catch((error) => {
+                    console.error('Lỗi khi gửi yêu cầu API:', error);
                 });
-            }
-
-            setTotalPages(Math.ceil(data.length / rowsPerPage)); // Tính tổng số trang
-            const startIndex = (currentPage - 1) * rowsPerPage;
-            const endIndex = startIndex + rowsPerPage;
-            const slicedData = data.slice(startIndex, endIndex);
-            setInputPage(currentPage.toString()); // Chuyển currentPage thành chuỗi
-            setListDataSensor(slicedData);
         }
 
-        callapi();
-    }, [currentPage, searchClicked, temperature, humidity, light]);
+        client.subscribe(TOPIC_IOT_WEATHER);
+        client.on('message', (topic, message) => {
+            const sensorData = JSON.parse(message.toString());
+
+            // Kiểm tra nếu có các trường như 'temperature', 'humidity' và 'light' trong dữ liệu nhận được
+            if (sensorData.temperature !== undefined && sensorData.humidity !== undefined && sensorData.light !== undefined && sensorData.dust !== undefined) {
+                handleData(sensorData);
+            }
+        });
+
+        const interval = setInterval(callapi, 2000);
+
+        // Xóa interval khi component bị hủy
+        return () => {
+            clearInterval(interval);
+            client.unsubscribe(TOPIC_IOT_WEATHER);
+        };
+    }, [currentPage, isClear, searchClicked, temperature, humidity, light]); // Rỗng để chỉ chạy một lần khi component được render
 
     const handlePageInputChange = (e) => {
         setTempInputPage(e.target.value); // Cập nhật giá trị tạm thời
@@ -75,24 +87,39 @@ function DataSensor() {
         }
     };
 
+    function handleData(data) {
+        if (!isUpload) {
+            setIsUpload(true);
+            axios.post('http://localhost:8080/add-sensor', data)
+                .then((response) => {
+                    console.log('Dữ liệu đã được gửi thành công tu sensor data:', response.data);
+                    // Thực hiện các hành động khác sau khi gửi dữ liệu thành công (nếu cần)
+                })
+                .catch((error) => {
+                    console.error('Đã xảy ra lỗi khi gửi dữ liệu:', error);
+                    // Xử lý lỗi (nếu cần)
+                })
+                .finally(() => {
+                    setIsUpload(false);
+                });
+        }
+    }
     const handleSearch = () => {
         if (temperatureInput !== '' || humidityInput !== '' || lightInput !== '') {
             setTemperature(temperatureInput.trim());
             setHumidity(humidityInput.trim());
             setLight(lightInput.trim());
             setSearchClicked(true);
-        } else {
-            setSearchClicked(false);
         }
+        else
+            setSearchClicked(false);
         setCurrentPage(1);
     };
-
     const handlePageSearchEnter = (e) => {
         if (e.key === 'Enter') {
             handleSearch();
         }
     }
-
     const handleExit = () => {
         setCurrentPage(1);
         setSearchClicked(false);
@@ -100,6 +127,27 @@ function DataSensor() {
         setHumidityInput('');
         setLightInput('');
     };
+
+    const handleClear = () => {
+        if (!isClear) {
+            setIsClear(true);
+
+            fetch(`http://localhost:8080/clear-sensor`)
+                .then((response) => {
+                    console.log('Dữ liệu đã được xóa thành công:');
+                    // Thực hiện các hành động khác sau khi xóa dữ liệu thành công (nếu cần)
+                })
+                .catch((error) => {
+                    console.error('Đã xảy ra lỗi khi xóa dữ liệu:', error);
+                    // Xử lý lỗi (nếu cần)
+                })
+                .finally(() => {
+                    // de refesh lai trang
+                    setIsClear(false);
+                });
+        }
+    };
+
 
     let rowCount = 0; // check hàng chẵn - lẻ
 
@@ -170,21 +218,67 @@ function DataSensor() {
                 )}
 
                 <div className="pagination">
-                    <button className='btn-truoc' onClick={() => setCurrentPage(currentPage - 1)} disabled={currentPage === 1}>
+                    <button
+                        className='btn-truoc'
+                        onClick={() => setCurrentPage(currentPage - 1)}
+                        disabled={currentPage === 1}
+                    >
                         Trước
                     </button>
-                    <input
-                        className='ip-trang'
-                        value={tempInputPage}
-                        onChange={handlePageInputChange}
-                        onKeyPress={handlePageInputEnter}
-                        placeholder={inputPage + "/" + totalPages}
-                        disabled = {true}
-                    />
-                    <button className='btn-tiep' onClick={() => setCurrentPage(currentPage + 1)} disabled={currentPage === totalPages}>
+
+                    {/* Hiển thị trang đầu tiên nếu currentPage > 2 */}
+                    {currentPage > 2 && (
+                        <>
+                            <button
+                                className={`page-number ${currentPage === 1 ? 'active' : ''}`}
+                                onClick={() => setCurrentPage(1)}
+                            >
+                                1
+                            </button>
+                            {currentPage > 3 && <span>...</span>} {/* Dấu ... nếu khoảng cách giữa trang đầu và trang hiện tại > 1 */}
+                        </>
+                    )}
+
+                    {/* Hiển thị các trang lân cận trang hiện tại */}
+                    {[...Array(totalPages)].map((_, index) => {
+                        const pageNum = index + 1;
+
+                        if (pageNum >= currentPage - 1 && pageNum <= currentPage + 1) {
+                            return (
+                                <button
+                                    key={pageNum}
+                                    className={`page-number ${currentPage === pageNum ? 'active' : ''}`}
+                                    onClick={() => setCurrentPage(pageNum)}
+                                >
+                                    {pageNum}
+                                </button>
+                            );
+                        }
+                        return null;
+                    })}
+
+                    {/* Hiển thị trang cuối cùng nếu currentPage < totalPages - 1 */}
+                    {currentPage < totalPages - 1 && (
+                        <>
+                            {currentPage < totalPages - 2 && <span>...</span>} {/* Dấu ... nếu khoảng cách giữa trang cuối và trang hiện tại > 1 */}
+                            <button
+                                className={`page-number ${currentPage === totalPages ? 'active' : ''}`}
+                                onClick={() => setCurrentPage(totalPages)}
+                            >
+                                {totalPages}
+                            </button>
+                        </>
+                    )}
+
+                    <button
+                        className='btn-tiep'
+                        onClick={() => setCurrentPage(currentPage + 1)}
+                        disabled={currentPage === totalPages}
+                    >
                         Tiếp
                     </button>
                 </div>
+
             </div>
         </div>
     );

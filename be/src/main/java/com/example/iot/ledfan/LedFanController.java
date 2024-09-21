@@ -28,6 +28,7 @@ public class LedFanController extends Controller {
                 String status = rs.getString("status"); // trangthai
                 Timestamp date = rs.getTimestamp("date"); // thoigian
                 ledFans.add(new LedFan(id, name, status, date));
+                System.out.println(id + name + status + date);
             }
             ps.close();
         } catch (Exception ex) {

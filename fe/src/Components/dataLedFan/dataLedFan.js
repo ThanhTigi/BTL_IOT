@@ -16,33 +16,29 @@ function DataLedFan() {
     const [isValidFormat, setIsValidFormat] = useState(true);
     const rowsPerPage = 20;
 
-    // Fake data tạm thời cho lịch sử bật tắt đèn và quạt
-    const fakeData = Array.from({ length: 100 }, (_, index) => ({
-        id: index + 1,
-        name: index % 3 === 0 ? 'Đèn' : index % 3 == 1 ? 'Quạt' : 'Điều hòa', // Tên thiết bị là 'Light' hoặc 'Fan' hoặc 'Air Conditioner'
-        status: Math.random() > 0.5 ? 'Bật' : 'Tắt', // Trạng thái ngẫu nhiên bật hoặc tắt
-        date: moment().subtract(Math.random() * 100, 'days').format('YYYY-MM-DD HH:mm:ss'), // Thời gian ngẫu nhiên trong 100 ngày qua
-    }));
-
     useEffect(() => {
-        function callapi() {
-            // Khi chưa có API, sử dụng dữ liệu fake
-            let data = fakeData;
+        // Gửi yêu cầu API và lấy dữ liệu
+        fetch(`http://localhost:8080/${searchClicked ? `searchfanlight?startTime=${thoigian} 00:00:00&endTime=${thoigian} 23:59:59` : `fanlights`}`) // Thay thế URL_API_CUBAN bằng URL API thực tếA_
+            .then((response) => response.json())
+            .then((data) => {
+                data.forEach((item) => {
+                    item.thoigian = moment(item.thoigian).format('YYYY-MM-DD HH:mm:ss');
+                });
 
-            // Tính tổng số trang
-            const totalPages = Math.ceil(data.length / rowsPerPage);
-            setTotalPages(totalPages);
+                const totalPages = Math.ceil(data.length / rowsPerPage);
+                setTotalPages(totalPages);
 
-            // Cắt lát dữ liệu dựa trên trang hiện tại và rowsPerPage
-            const startIndex = (currentPage - 1) * rowsPerPage;
-            const endIndex = startIndex + rowsPerPage;
-            const slicedData = data.slice(startIndex, endIndex);
-            setInputPage(currentPage.toString()); // Chuyển currentPage thành chuỗi
-            setHistoryfanlight(slicedData);
-        }
-
-        callapi();
-    }, [currentPage]);
+                // Cắt lát dữ liệu dựa trên trang hiện tại và rowsPerPage
+                const startIndex = (currentPage - 1) * rowsPerPage;
+                const endIndex = startIndex + rowsPerPage;
+                const slicedData = data.slice(startIndex, endIndex);
+                setInputPage(currentPage.toString()); // Chuyển currentPage thành chuỗi
+                setHistoryfanlight(slicedData);
+            })
+            .catch((error) => {
+                console.error('Lỗi khi gửi yêu cầu API:', error);
+            });
+    }, [currentPage, searchClicked, thoigiandata]);
 
     const handlePageInputChange = (e) => {
         setTempInputPage(e.target.value); // Cập nhật giá trị tạm thời
@@ -54,10 +50,10 @@ function DataLedFan() {
             if (newPage >= 1 && newPage <= totalPages) {
                 setCurrentPage(newPage);
                 setTempInputPage('');
+                setTempInputPage('')
             }
         }
     };
-
     const handleSearch = () => {
         if (thoigian !== '') {
             if (isValidDateFormat(thoigian)) {
@@ -74,25 +70,22 @@ function DataLedFan() {
         }
         setCurrentPage(1);
     };
-
     const handleExit = () => {
         setCurrentPage(1);
         setSearchClicked(false);
         setIsValidFormat(true);
         setThoigian('');
     };
-
     function isValidDateFormat(input) {
         // Sử dụng regex để kiểm tra định dạng
         const dateFormat = /^\d{4}-\d{2}-\d{2}$/;
         return dateFormat.test(input);
     }
-
     const handlePageInputSearch = (e) => {
         if (e.key === 'Enter') {
             handleSearch();
         }
-    };
+    }
 
     return (
         <div>
@@ -132,21 +125,67 @@ function DataLedFan() {
                 )}
 
                 <div className="pagination">
-                    <button className='btn-truoc' onClick={() => setCurrentPage(currentPage - 1)} disabled={currentPage === 1}>
+                    <button
+                        className='btn-truoc'
+                        onClick={() => setCurrentPage(currentPage - 1)}
+                        disabled={currentPage === 1}
+                    >
                         Trước
                     </button>
-                    <input
-                        className='ip-trang'
-                        value={tempInputPage}
-                        onChange={handlePageInputChange}
-                        onKeyPress={handlePageInputEnter}
-                        placeholder={inputPage + "/" + totalPages}
-                        disabled = {true}
-                    />
-                    <button className='btn-tiep' onClick={() => setCurrentPage(currentPage + 1)} disabled={currentPage === totalPages}>
+
+                    {/* Hiển thị trang đầu tiên nếu currentPage > 2 */}
+                    {currentPage > 2 && (
+                        <>
+                            <button
+                                className={`page-number ${currentPage === 1 ? 'active' : ''}`}
+                                onClick={() => setCurrentPage(1)}
+                            >
+                                1
+                            </button>
+                            {currentPage > 3 && <span>...</span>} {/* Dấu ... nếu khoảng cách giữa trang đầu và trang hiện tại > 1 */}
+                        </>
+                    )}
+
+                    {/* Hiển thị các trang lân cận trang hiện tại */}
+                    {[...Array(totalPages)].map((_, index) => {
+                        const pageNum = index + 1;
+
+                        if (pageNum >= currentPage - 1 && pageNum <= currentPage + 1) {
+                            return (
+                                <button
+                                    key={pageNum}
+                                    className={`page-number ${currentPage === pageNum ? 'active' : ''}`}
+                                    onClick={() => setCurrentPage(pageNum)}
+                                >
+                                    {pageNum}
+                                </button>
+                            );
+                        }
+                        return null;
+                    })}
+
+                    {/* Hiển thị trang cuối cùng nếu currentPage < totalPages - 1 */}
+                    {currentPage < totalPages - 1 && (
+                        <>
+                            {currentPage < totalPages - 2 && <span>...</span>} {/* Dấu ... nếu khoảng cách giữa trang cuối và trang hiện tại > 1 */}
+                            <button
+                                className={`page-number ${currentPage === totalPages ? 'active' : ''}`}
+                                onClick={() => setCurrentPage(totalPages)}
+                            >
+                                {totalPages}
+                            </button>
+                        </>
+                    )}
+
+                    <button
+                        className='btn-tiep'
+                        onClick={() => setCurrentPage(currentPage + 1)}
+                        disabled={currentPage === totalPages}
+                    >
                         Tiếp
                     </button>
                 </div>
+
             </div>
         </div>
     );

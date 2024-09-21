@@ -145,10 +145,16 @@ const Page = () => {
     };
     useEffect(() => {
         // Gửi tin nhắn MQTT khi đèn được bật hoặc tắt
-        const message = isLedOn ? 'on' : 'off';
-        client.publish(TOPIC_CONTROL_LED, message);
+        const message = isLedOn ? 'Bật' : 'Tắt';
+        client.publish(TOPIC_CONTROL_LED, message, {}, (error) => {
+            if (error) {
+                console.error("Publish failed: ", error);
+            } else {
+                console.log("Publish success to topic: " + TOPIC_CONTROL_LED);
+            }
+        });
+        
         postLedFanToDatabase('Led', message);
-        console.log("Đã gửi tin nhắn " + message + " đến topic " + TOPIC_CONTROL_LED);
 
         // Nếu đèn được bật, tăng số lần bật đèn
         if (isLedOn) {
@@ -162,10 +168,15 @@ const Page = () => {
     };
     useEffect(() => {
         // Gửi tin nhắn MQTT khi đèn được bật hoặc tắt
-        const message = isFanOn ? 'on' : 'off';
-        client.publish(TOPIC_CONTROL_FAN, message);
+        const message = isFanOn ? 'Bật' : 'Tắt';
+        client.publish(TOPIC_CONTROL_FAN, message, {}, (error) => {
+            if (error) {
+                console.error("Publish failed: ", error);
+            } else {
+                console.log("Publish success to topic: " + TOPIC_CONTROL_FAN);
+            }
+        });
         postLedFanToDatabase('Fan', message);
-        console.log("Đã gửi tin nhắn " + message + " đến topic " + TOPIC_CONTROL_FAN);
 
         // Nếu quạt được bật, tăng số lần bật quạt
         if (isFanOn) {
@@ -179,10 +190,15 @@ const Page = () => {
     };
     useEffect(() => {
         // Gửi tin nhắn MQTT khi điều hòa được bật hoặc tắt
-        const message = isAirOn ? 'on' : 'off';
-        client.publish(TOPIC_CONTROL_AIR, message);
+        const message = isAirOn ? 'Bật' : 'Tắt';
+        client.publish(TOPIC_CONTROL_AIR, message, {}, (error) => {
+            if (error) {
+                console.error("Publish failed: ", error);
+            } else {
+                console.log("Publish success to topic: " + TOPIC_CONTROL_AIR);
+            }
+        });
         postLedFanToDatabase('Air', message);
-        console.log("Đã gửi tin nhắn " + message + " đến topic " + TOPIC_CONTROL_AIR);
 
         // Nếu điều hòa được bật, tăng số lần bật điều hòa
         if (isAirOn) {
@@ -235,7 +251,7 @@ const Page = () => {
                     <div className="page-btn-chucnang">
                         <div className="page-btn-den">
                             <div className="btn-icon">
-                                <p>Số lần bật đèn: {turnOnLightCount}</p>
+                                <p>Trạng thái đèn</p>
                                 <img className="btn-icon-den" src={isLedOn ? urlLedOn : urlLedOff} alt="Bulb" />
                                 <br />
                                 <button className={`light-btn ${isLedOn ? 'on' : 'off'}`} onClick={toggleLed}>
@@ -248,7 +264,7 @@ const Page = () => {
 
                         <div className="page-btn-quat">
                             <div className="btn-icon">
-                                <p>Số lần bật quạt: {turnOnFanCount}</p>
+                                <p>Trạng thái quạt</p>
                                 <img className="btn-icon-den" src={isFanOn ? urlFanOn : urlFanOff} alt="Bulb" />
                                 <br />
                                 <button className={`light-btn ${isFanOn ? 'on' : 'off'}`} onClick={toggleFan}>
@@ -259,7 +275,7 @@ const Page = () => {
 
                         <div className="page-btn-dieu-hoa">
                             <div className="btn-icon">
-                                <p>Số lần bật điều hòa: {turnOnAirCount}</p>
+                                <p>Trạng thái điều hòa</p>
                                 <img className="btn-icon-den" src={isAirOn ? urlAirOn : urlAirOff} alt="Bulb" />
                                 <br />
                                 <button className={`light-btn ${isAirOn ? 'on' : 'off'}`} onClick={toggleAir}>
