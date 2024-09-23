@@ -1,6 +1,7 @@
 #include <WiFi.h>
 #include <PubSubClient.h>
 #include "DHT.h"
+#include <ArduinoJson.h>
 
 #define dhtpin 25
 #define dhttype DHT11
@@ -14,15 +15,15 @@ DHT dht(dhtpin, dhttype);
 
 
 // Thông tin mạng WiFi
-const char* ssid = "P603-2.4Ghz";
-const char* password = "hoilamgi";
+const char* ssid = "TiGii";
+const char* password = "12345689";
 
 // MQTT Server
-const char *mqtt_broker = "broker.hivemq.com";
+const char *mqtt_broker = "broker.emqx.io";
 const int mqtt_port = 1883;
 const char* mqtt_user = "thanh";  // Username MQTT
 const char* mqtt_pass = "678";  // Password MQTT
-const char* mqtt_sensor_topic = "home/sensor/data";
+const char* topicIotWeather = "iot/weather";
 const char* mqtt_status_topic = "home/device/status";
 const char* TOPIC_CONTROL_LED = "control/led";
 const char* TOPIC_CONTROL_FAN = "control/fan";
@@ -113,7 +114,7 @@ void setup() {
 
 void loop() {
   client.loop();  // Lắng nghe lệnh từ MQTT
-  // Đọc dữ liệu cảm biến DHT11 và LDR
+  // Đọc nhiệt độ, độ ẩm, ánh sáng
   float humidity = dht.readHumidity();
   float temperature = dht.readTemperature();
   int sensorValue = analogRead(LDR_PIN);  
@@ -123,13 +124,25 @@ void loop() {
     lux = 200000;
   }
   float light = lux;
+  float dust = random(1, 100);
 
-  // Chuẩn bị dữ liệu dưới dạng JSON
-  String jsonData = "{\"temperature\": " + String(temperature) + 
-                    ", \"humidity\": " + String(humidity) + 
-                    ", \"light\": " + String(light) + "}";
+  // Chuyển dữ liệu sang chuỗi để publish qua json
+  String temperature_payload = String(int(temperature));
+  String humidity_payload = String(int(humidity));
+  String light_payload = String(int(light));
+  String dust_payload = String(int(dust));
 
-  // Gửi dữ liệu cảm biến qua MQTT
-  client.publish(mqtt_sensor_topic, jsonData.c_str());
+  // Thêm dữ liệu vào JSON
+  StaticJsonDocument<200> weatherJson;
+  weatherJson["temperature"] = temperature_payload;
+  weatherJson["humidity"] = humidity_payload;
+  weatherJson["light"] = light_payload;
+  weatherJson["dust"] = dust_payload;
+
+  // Chuyển đổi JSON thành chuỗi và gửi lên MQTT
+  char weatherJsonStr[200];
+  serializeJson(weatherJson, weatherJsonStr);
+  Serial.println(weatherJsonStr);
+  client.publish(topicIotWeather, weatherJsonStr);
   delay(5000);  // Gửi dữ liệu mỗi 30 giây
 }

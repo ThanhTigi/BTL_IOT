@@ -38,14 +38,25 @@ const Page = () => {
 
     const [isUpload, setIsUpload] = useState(false);
 
-    const [turnOnLightCount, setTurnOnLightCount] = useState(0);
-    const [turnOnFanCount, setTurnOnFanCount] = useState(0);
-    const [turnOnAirCount, setTurnOnAirCount] = useState(0);
-
-
-    const client = mqtt.connect('wss://broker.hivemq.com:8884/mqtt'); // Tạo một MQTT client
+    const client = mqtt.connect('wss://broker.emqx.io:8084/mqtt'); // Tạo một MQTT client
 
     useEffect(() => {
+        console.log("sub");
+        client.on('connect', () => {
+            console.log("Connected to broker");
+            client.subscribe(TOPIC_IOT_WEATHER);
+            client.subscribe(TOPIC_IOT_LED_FAN_AIR);
+        });
+    
+        client.on('error', (err) => {
+            console.error("Connection error: ", err);
+            client.reconnect();
+        });
+    
+        client.on('offline', () => {
+            console.warn("Client is offline, trying to reconnect...");
+            client.reconnect();
+        });
         // Khi kết nối thành công, subscribe các topic
         client.subscribe(TOPIC_IOT_WEATHER);
         client.subscribe(TOPIC_IOT_LED_FAN_AIR);
@@ -92,10 +103,11 @@ const Page = () => {
 
         // Khi destroy
         return () => {
+            console.log("unsub");
             client.unsubscribe(TOPIC_IOT_WEATHER);
             client.unsubscribe(TOPIC_IOT_LED_FAN_AIR);
         };
-    }, [client, temperature, humidity, light]);
+    }, []);
 
 
     // gửi dữ liệu sensor lên db
@@ -144,22 +156,26 @@ const Page = () => {
         setIsLedOn(prevState => !prevState);
     };
     useEffect(() => {
+        client.on('error', (err) => {
+            console.error("Connection error: ", err);
+            client.reconnect();
+        });
+    
+        client.on('offline', () => {
+            console.warn("Client is offline, trying to reconnect...");
+            client.reconnect();
+        });
         // Gửi tin nhắn MQTT khi đèn được bật hoặc tắt
         const message = isLedOn ? 'Bật' : 'Tắt';
         client.publish(TOPIC_CONTROL_LED, message, {}, (error) => {
             if (error) {
                 console.error("Publish failed: ", error);
             } else {
+                postLedFanToDatabase('Led', message);
                 console.log("Publish success to topic: " + TOPIC_CONTROL_LED);
             }
         });
         
-        postLedFanToDatabase('Led', message);
-
-        // Nếu đèn được bật, tăng số lần bật đèn
-        if (isLedOn) {
-            setTurnOnLightCount((prevCount) => prevCount + 1);
-        }
     }, [isLedOn]);
 
     // Hàm bật/tắt quạt
@@ -173,15 +189,11 @@ const Page = () => {
             if (error) {
                 console.error("Publish failed: ", error);
             } else {
+                postLedFanToDatabase('Fan', message);
                 console.log("Publish success to topic: " + TOPIC_CONTROL_FAN);
             }
         });
-        postLedFanToDatabase('Fan', message);
-
-        // Nếu quạt được bật, tăng số lần bật quạt
-        if (isFanOn) {
-            setTurnOnFanCount((prevCount) => prevCount + 1);
-        }
+        
     }, [isFanOn]);
 
     // Hàm bật/tắt điều hòa
@@ -195,35 +207,14 @@ const Page = () => {
             if (error) {
                 console.error("Publish failed: ", error);
             } else {
+                postLedFanToDatabase('Air', message);
                 console.log("Publish success to topic: " + TOPIC_CONTROL_AIR);
             }
         });
-        postLedFanToDatabase('Air', message);
-
-        // Nếu điều hòa được bật, tăng số lần bật điều hòa
-        if (isAirOn) {
-            setTurnOnAirCount((prevCount) => prevCount + 1);
-        }
+        
     }, [isAirOn]);
 
 
-
-    useEffect(() => {
-        // Gửi yêu cầu API để lấy số lần bật đèn từ controller
-        const fetchData = async () => {
-            try {
-                const response = await fetch('http://localhost:8080/count-led');
-                const data = await response.json();
-
-                // Cập nhật giá trị số lần bật đèn từ dữ liệu nhận được
-                setTurnOnLightCount(data);
-            } catch (error) {
-                console.error('Lỗi khi lấy dữ liệu từ API:', error);
-            }
-        };
-
-        fetchData();
-    }, [turnOnLightCount]); // useEffect sẽ chạy một lần sau khi component được render
 
 
     // Render giao diện

@@ -4,21 +4,19 @@ import moment from 'moment';
 import "./dataLedFan.css"
 
 function DataLedFan() {
-
     const [historyfanlight, setHistoryfanlight] = useState(null);
     const [thoigian, setThoigian] = useState('');
     const [thoigiandata, setThoigiandata] = useState('');
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
-    const [inputPage, setInputPage] = useState(currentPage);
-    const [tempInputPage, setTempInputPage] = useState(''); // State tạm thời
+    const [tempInputPage, setTempInputPage] = useState(''); 
     const [searchClicked, setSearchClicked] = useState(false);
     const [isValidFormat, setIsValidFormat] = useState(true);
-    const rowsPerPage = 20;
+    const [rowsPerPage, setRowsPerPage] = useState(20); // State để điều chỉnh số lượng hàng
 
     useEffect(() => {
         // Gửi yêu cầu API và lấy dữ liệu
-        fetch(`http://localhost:8080/${searchClicked ? `searchfanlight?startTime=${thoigian} 00:00:00&endTime=${thoigian} 23:59:59` : `fanlights`}`) // Thay thế URL_API_CUBAN bằng URL API thực tếA_
+        fetch(`http://localhost:8080/${searchClicked ? `searchfanlight?startTime=${thoigian} 00:00:00&endTime=${thoigian} 23:59:59` : `fanlights`}`)
             .then((response) => response.json())
             .then((data) => {
                 data.forEach((item) => {
@@ -32,16 +30,15 @@ function DataLedFan() {
                 const startIndex = (currentPage - 1) * rowsPerPage;
                 const endIndex = startIndex + rowsPerPage;
                 const slicedData = data.slice(startIndex, endIndex);
-                setInputPage(currentPage.toString()); // Chuyển currentPage thành chuỗi
                 setHistoryfanlight(slicedData);
             })
             .catch((error) => {
                 console.error('Lỗi khi gửi yêu cầu API:', error);
             });
-    }, [currentPage, searchClicked, thoigiandata]);
+    }, [currentPage, searchClicked, thoigiandata, rowsPerPage]); // Thêm rowsPerPage vào dependency array
 
     const handlePageInputChange = (e) => {
-        setTempInputPage(e.target.value); // Cập nhật giá trị tạm thời
+        setTempInputPage(e.target.value); 
     };
 
     const handlePageInputEnter = (e) => {
@@ -50,10 +47,19 @@ function DataLedFan() {
             if (newPage >= 1 && newPage <= totalPages) {
                 setCurrentPage(newPage);
                 setTempInputPage('');
-                setTempInputPage('')
             }
         }
     };
+
+    const handleUpdateRowsPerPage = () => {
+        const newRowsPerPage = parseInt(tempInputPage, 10);
+        if (newRowsPerPage > 0) {
+            setRowsPerPage(newRowsPerPage); // Cập nhật số lượng hàng trên mỗi trang
+            setCurrentPage(1); // Reset về trang đầu
+        }
+        setTempInputPage(''); // Xóa ô nhập sau khi cập nhật
+    };
+
     const handleSearch = () => {
         if (thoigian !== '') {
             if (isValidDateFormat(thoigian)) {
@@ -63,28 +69,23 @@ function DataLedFan() {
             } else {
                 setIsValidFormat(isValidDateFormat(thoigian));
             }
-        }
-        else {
+        } else {
             setSearchClicked(false);
             setIsValidFormat(true);
         }
         setCurrentPage(1);
     };
+
     const handleExit = () => {
         setCurrentPage(1);
         setSearchClicked(false);
         setIsValidFormat(true);
         setThoigian('');
     };
+
     function isValidDateFormat(input) {
-        // Sử dụng regex để kiểm tra định dạng
         const dateFormat = /^\d{4}-\d{2}-\d{2}$/;
         return dateFormat.test(input);
-    }
-    const handlePageInputSearch = (e) => {
-        if (e.key === 'Enter') {
-            handleSearch();
-        }
     }
 
     return (
@@ -94,6 +95,18 @@ function DataLedFan() {
             </div>
             <div className='container-data'>
                 <h1>Lịch sử bật tắt thiết bị</h1>
+
+                <div>
+                    <label htmlFor="rowsPerPageInput">Số hàng mỗi trang: </label>
+                    <input
+                        id="rowsPerPageInput"
+                        type="number"
+                        value={tempInputPage}
+                        onChange={handlePageInputChange}
+                        min="1"
+                    />
+                    <button onClick={handleUpdateRowsPerPage}>OK</button> {/* Nút OK để cập nhật */}
+                </div>
 
                 {historyfanlight && (
                     <table>
@@ -106,20 +119,18 @@ function DataLedFan() {
                             </tr>
                         </thead>
                         <tbody>
-                            {
-                                historyfanlight.map((data) => {
-                                    const isOn = data.status === "Bật";
-                                    const rowClass = isOn ? "green-row" : "red-row";
-                                    return (
-                                        <tr className={rowClass} key={data.id}>
-                                            <td>{data.id}</td>
-                                            <td>{data.name}</td>
-                                            <td>{data.status}</td>
-                                            <td>{data.date}</td>
-                                        </tr>
-                                    );
-                                })
-                            }
+                            {historyfanlight.map((data) => {
+                                const isOn = data.status === "Bật";
+                                const rowClass = isOn ? "green-row" : "red-row";
+                                return (
+                                    <tr className={rowClass} key={data.id}>
+                                        <td>{data.id}</td>
+                                        <td>{data.name}</td>
+                                        <td>{data.status}</td>
+                                        <td>{data.date}</td>
+                                    </tr>
+                                );
+                            })}
                         </tbody>
                     </table>
                 )}
@@ -133,7 +144,6 @@ function DataLedFan() {
                         Trước
                     </button>
 
-                    {/* Hiển thị trang đầu tiên nếu currentPage > 2 */}
                     {currentPage > 2 && (
                         <>
                             <button
@@ -142,11 +152,10 @@ function DataLedFan() {
                             >
                                 1
                             </button>
-                            {currentPage > 3 && <span>...</span>} {/* Dấu ... nếu khoảng cách giữa trang đầu và trang hiện tại > 1 */}
+                            {currentPage > 3 && <span>...</span>}
                         </>
                     )}
 
-                    {/* Hiển thị các trang lân cận trang hiện tại */}
                     {[...Array(totalPages)].map((_, index) => {
                         const pageNum = index + 1;
 
@@ -164,10 +173,9 @@ function DataLedFan() {
                         return null;
                     })}
 
-                    {/* Hiển thị trang cuối cùng nếu currentPage < totalPages - 1 */}
                     {currentPage < totalPages - 1 && (
                         <>
-                            {currentPage < totalPages - 2 && <span>...</span>} {/* Dấu ... nếu khoảng cách giữa trang cuối và trang hiện tại > 1 */}
+                            {currentPage < totalPages - 2 && <span>...</span>}
                             <button
                                 className={`page-number ${currentPage === totalPages ? 'active' : ''}`}
                                 onClick={() => setCurrentPage(totalPages)}
@@ -185,7 +193,6 @@ function DataLedFan() {
                         Tiếp
                     </button>
                 </div>
-
             </div>
         </div>
     );

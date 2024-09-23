@@ -75,7 +75,6 @@ function Chart(props) {
 
     // Tự động cập nhật dữ liệu mỗi 2 giây
     useEffect(() => {
-        console.log('Chart: useEffect');
         fetchDataAndUpdate();
         // const intervalId = setInterval(fetchDataAndUpdate, 2000);
 
