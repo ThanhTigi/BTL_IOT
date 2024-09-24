@@ -43,11 +43,10 @@ const Page = () => {
     },[]
     )
 
-    setTimeout(() => {
+    setInterval(() => {
         fetch(`http://localhost:8080/get-sensor`)
         .then((response) => response.json())
                 .then((datasub) => {
-                    console.log("Message: " + datasub);
 
                 // Kiểm tra nếu có các trường như 'temperature', 'humidity' và 'light' trong dữ liệu nhận được
                 if (datasub.temperature !== undefined && datasub.humidity !== undefined && datasub.light !== undefined) {
