@@ -19,24 +19,34 @@ function DataLedFan() {
         fetch(`http://localhost:8080/${searchClicked ? `searchfanlight?startTime=${thoigian} 00:00:00&endTime=${thoigian} 23:59:59` : `fanlights`}`)
             .then((response) => response.json())
             .then((data) => {
+                // Format lại thời gian cho từng phần tử
                 data.forEach((item) => {
-                    item.thoigian = moment(item.thoigian).format('YYYY-MM-DD HH:mm:ss');
+                    item.date = moment(item.date).format('YYYY-MM-DD HH:mm:ss');
                 });
-
-                const totalPages = Math.ceil(data.length / rowsPerPage);
+    
+                // Đảo ngược các bản ghi nhưng giữ nguyên cột ID
+                const reversedData = data.map((item, index, array) => ({
+                    ...array[array.length - 1 - index],  // Lấy phần tử từ cuối của mảng đảo ngược
+                    id: item.id  // Giữ nguyên ID từ bản gốc
+                }));
+    
+                const totalPages = Math.ceil(reversedData.length / rowsPerPage);
                 setTotalPages(totalPages);
-
+    
                 // Cắt lát dữ liệu dựa trên trang hiện tại và rowsPerPage
                 const startIndex = (currentPage - 1) * rowsPerPage;
                 const endIndex = startIndex + rowsPerPage;
-                const slicedData = data.slice(startIndex, endIndex);
+                const slicedData = reversedData.slice(startIndex, endIndex);
+    
                 setHistoryfanlight(slicedData);
             })
             .catch((error) => {
                 console.error('Lỗi khi gửi yêu cầu API:', error);
             });
-    }, [currentPage, searchClicked, thoigiandata, rowsPerPage]); // Thêm rowsPerPage vào dependency array
-
+    }, [currentPage, searchClicked, thoigiandata, rowsPerPage]);
+    
+    
+    
     const handlePageInputChange = (e) => {
         setTempInputPage(e.target.value); 
     };

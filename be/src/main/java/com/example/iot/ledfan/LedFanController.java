@@ -2,6 +2,8 @@ package com.example.iot.ledfan;
 
 
 import com.example.iot.Controller;
+import com.example.iot.MQTTController;
+import org.eclipse.paho.client.mqttv3.MqttException;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
@@ -9,6 +11,7 @@ import java.sql.*;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @CrossOrigin
@@ -28,7 +31,6 @@ public class LedFanController extends Controller {
                 String status = rs.getString("status"); // trangthai
                 Timestamp date = rs.getTimestamp("date"); // thoigian
                 ledFans.add(new LedFan(id, name, status, date));
-                System.out.println(id + name + status + date);
             }
             ps.close();
         } catch (Exception ex) {
@@ -38,8 +40,8 @@ public class LedFanController extends Controller {
         return ledFans;
     }
 
-    @PostMapping("/add-ledfan")
-    public LedFan addLedFan(@RequestBody LedFan ledFan) throws SQLException {
+
+    public static LedFan addLedFan(LedFan ledFan) throws SQLException {
         ledFan.setDate(Timestamp.valueOf(LocalDateTime.now()));
 
         try {
@@ -84,21 +86,5 @@ public class LedFanController extends Controller {
         return ledFans;
     }
 
-    @GetMapping("/count-led")
-    public int getCountOnLed() {
-        String query = "SELECT COUNT(*) AS count FROM ledFan WHERE (name = 'led' OR name = 'Led') AND (status = 'on' OR status = 'On')";
-        try (PreparedStatement ps = connection.prepareStatement(query);
-             ResultSet rs = ps.executeQuery()) {
 
-            if (rs.next()) {
-                System.out.println("so lan bat den: " + rs.getInt("count"));
-                return rs.getInt("count");
-            }
-
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-
-        return 0; // Trong trường hợp có lỗi
-    }
 }

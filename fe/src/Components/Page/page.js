@@ -8,8 +8,6 @@ import Menu from '../menu/menu';
 import mqtt from 'precompiled-mqtt';
 import 'bootstrap-icons/font/bootstrap-icons.css';
 import './page.css'
-import Dust from '../dht11/dust';
-import Chartdobui from '../chartDobui/chartDobui';
 
 // Khai báo các biến hằng
 const urlLedOn = "/light_on.jpg";
@@ -27,6 +25,7 @@ const TOPIC_CONTROL_AIR = 'control/air';
 
 const Page = () => {
     // Khởi tạo các trạng thái cho đèn và quạt
+    
     const [isLedOn, setIsLedOn] = useState(false);
     const [isFanOn, setIsFanOn] = useState(false);
     const [isAirOn, setIsAirOn] = useState(false);
@@ -34,188 +33,91 @@ const Page = () => {
     const [temperature, setTemperature] = useState(50); // Giả định nhiệt độ
     const [humidity, setHumidity] = useState(90); // Giả định độ ẩm
     const [light, setLight] = useState(1000); // Giả định độ sáng
-    const [dust, setDust] = useState(60);
 
-    const [isUpload, setIsUpload] = useState(false);
 
-    const client = mqtt.connect('wss://broker.emqx.io:8084/mqtt'); // Tạo một MQTT client
+    useEffect(() =>
+    {
+        toggleLed(false);
+        toggleAir(false);
+        toggleFan(false);
+    },[]
+    )
 
-    useEffect(() => {
-        console.log("sub");
-        client.on('connect', () => {
-            console.log("Connected to broker");
-            client.subscribe(TOPIC_IOT_WEATHER);
-            client.subscribe(TOPIC_IOT_LED_FAN_AIR);
-        });
-    
-        client.on('error', (err) => {
-            console.error("Connection error: ", err);
-            client.reconnect();
-        });
-    
-        client.on('offline', () => {
-            console.warn("Client is offline, trying to reconnect...");
-            client.reconnect();
-        });
-        // Khi kết nối thành công, subscribe các topic
-        client.subscribe(TOPIC_IOT_WEATHER);
-        client.subscribe(TOPIC_IOT_LED_FAN_AIR);
-
-        // Khi nhận được tin nhắn, cập nhật các trạng thái
-        client.on('message', (topic, message) => {
-
-            console.log("Topic: " + topic + " - Message: " + message);
-            const datasub = JSON.parse(message.toString());
-
-            if (topic === TOPIC_IOT_WEATHER) {
+    setTimeout(() => {
+        fetch(`http://localhost:8080/get-sensor`)
+        .then((response) => response.json())
+                .then((datasub) => {
+                    console.log("Message: " + datasub);
 
                 // Kiểm tra nếu có các trường như 'temperature', 'humidity' và 'light' trong dữ liệu nhận được
-                if (datasub.temperature !== undefined && datasub.humidity !== undefined && datasub.light !== undefined && datasub.dust !== undefined) {
+                if (datasub.temperature !== undefined && datasub.humidity !== undefined && datasub.light !== undefined) {
                     setTemperature(datasub.temperature);
                     setHumidity(datasub.humidity);
                     setLight(datasub.light);
-                    setDust(datasub.dust);
-
-                    // gui du lieu len database
-                    postDataSensorToDatabase(datasub.temperature, datasub.humidity, datasub.light, datasub.dust);
                 }
-            }
-            else if (topic === TOPIC_IOT_LED_FAN_AIR) {
-                if (datasub.led !== undefined && datasub.fan !== undefined && datasub.air !== undefined) {
-                    if (datasub.led === 'on') {
-                        setIsLedOn(true);
-                    } else {
-                        setIsLedOn(false);
-                    }
-                    if (datasub.fan === 'on') {
-                        setIsFanOn(true);
-                    } else {
-                        setIsFanOn(false);
-                    }
-                    if (datasub.air === 'on') {
-                        setIsAirOn(true);
-                    } else {
-                        setIsAirOn(false);
-                    }
-                }
-            }
-        });
-
-        // Khi destroy
-        return () => {
-            console.log("unsub");
-            client.unsubscribe(TOPIC_IOT_WEATHER);
-            client.unsubscribe(TOPIC_IOT_LED_FAN_AIR);
-        };
-    }, []);
-
-
-    // gửi dữ liệu sensor lên db
-    function postDataSensorToDatabase(nhietdo, doam, anhsang, dobui) {
-        if (!isUpload) {
-            setIsUpload(true);
-            axios.post('http://localhost:8080/add-sensor', {
-                temperature: nhietdo,
-                humidity: doam,
-                light: anhsang,
-                dust: dobui
-            })
-                .then((response) => {
-                    console.log('Dữ liệu đã được gửi thành công tu page:', response.data);
-                    // Thực hiện các hành động khác sau khi gửi dữ liệu thành công (nếu cần)
                 })
                 .catch((error) => {
-                    console.error('Đã xảy ra lỗi khi gửi dữ liệu:', error);
-                    // Xử lý lỗi (nếu cần)
-                })
-                .finally(() => {
-                    setIsUpload(false);
+                    console.error('Lỗi khi gửi yêu cầu API:', error);
                 });
-        }
-    }
-
-    // gửi lịch sử bật tắt lên database
-    function postLedFanToDatabase(ten, trangthai) {
-        axios.post('http://localhost:8080/add-ledfan', {
-            name: ten,
-            status: trangthai
-        })
-            .then((response) => {
-                console.log('Dữ liệu đã được gửi thành công tu page:', response.data);
-                // Thực hiện các hành động khác sau khi gửi dữ liệu thành công (nếu cần)
-            })
-            .catch((error) => {
-                console.error('Đã xảy ra lỗi khi gửi dữ liệu:', error);
-                // Xử lý lỗi (nếu cần)
-            });
-    }
+    }, 2000);
 
 
     // Hàm bật/tắt đèn
-    const toggleLed = () => {
-        setIsLedOn(prevState => !prevState);
+    const toggleLed = (status) => {
+        fetch('http://localhost:8080/set-light-led', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ lightStatus: status }),
+        })
+            .then((response) => response.json())
+            .then((datasub) => {
+                console.log("Message: " + datasub);
+                setIsLedOn(datasub);
+            })
+            .catch((error) => {
+                console.error('Lỗi khi gửi yêu cầu API:', error);
+            });
     };
-    useEffect(() => {
-        client.on('error', (err) => {
-            console.error("Connection error: ", err);
-            client.reconnect();
-        });
-    
-        client.on('offline', () => {
-            console.warn("Client is offline, trying to reconnect...");
-            client.reconnect();
-        });
-        // Gửi tin nhắn MQTT khi đèn được bật hoặc tắt
-        const message = isLedOn ? 'Bật' : 'Tắt';
-        client.publish(TOPIC_CONTROL_LED, message, {}, (error) => {
-            if (error) {
-                console.error("Publish failed: ", error);
-            } else {
-                postLedFanToDatabase('Led', message);
-                console.log("Publish success to topic: " + TOPIC_CONTROL_LED);
-            }
-        });
-        
-    }, [isLedOn]);
 
     // Hàm bật/tắt quạt
-    const toggleFan = () => {
-        setIsFanOn(prevState => !prevState);
+    const toggleFan = (status) => {
+        fetch('http://localhost:8080/set-fan-led', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ fanStatus: status }),
+        })
+            .then((response) => response.json())
+            .then((datasub) => {
+                console.log("Message: " + datasub);
+                setIsFanOn(datasub);
+            })
+            .catch((error) => {
+                console.error('Lỗi khi gửi yêu cầu API:', error);
+            });
     };
-    useEffect(() => {
-        // Gửi tin nhắn MQTT khi đèn được bật hoặc tắt
-        const message = isFanOn ? 'Bật' : 'Tắt';
-        client.publish(TOPIC_CONTROL_FAN, message, {}, (error) => {
-            if (error) {
-                console.error("Publish failed: ", error);
-            } else {
-                postLedFanToDatabase('Fan', message);
-                console.log("Publish success to topic: " + TOPIC_CONTROL_FAN);
-            }
-        });
-        
-    }, [isFanOn]);
 
     // Hàm bật/tắt điều hòa
-    const toggleAir = () => {
-        setIsAirOn(prevState => !prevState);
+    const toggleAir = (status) => {
+        fetch('http://localhost:8080/set-air-led', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ airStatus: status }),
+        })
+            .then((response) => response.json())
+            .then((datasub) => {
+                console.log("Message: " + datasub);
+                setIsAirOn(datasub);
+            })
+            .catch((error) => {
+                console.error('Lỗi khi gửi yêu cầu API:', error);
+            });
     };
-    useEffect(() => {
-        // Gửi tin nhắn MQTT khi điều hòa được bật hoặc tắt
-        const message = isAirOn ? 'Bật' : 'Tắt';
-        client.publish(TOPIC_CONTROL_AIR, message, {}, (error) => {
-            if (error) {
-                console.error("Publish failed: ", error);
-            } else {
-                postLedFanToDatabase('Air', message);
-                console.log("Publish success to topic: " + TOPIC_CONTROL_AIR);
-            }
-        });
-        
-    }, [isAirOn]);
-
-
-
 
     // Render giao diện
     return (
@@ -245,7 +147,7 @@ const Page = () => {
                                 <p>Trạng thái đèn</p>
                                 <img className="btn-icon-den" src={isLedOn ? urlLedOn : urlLedOff} alt="Bulb" />
                                 <br />
-                                <button className={`light-btn ${isLedOn ? 'on' : 'off'}`} onClick={toggleLed}>
+                                <button className={`light-btn ${isLedOn ? 'on' : 'off'}`} onClick={() => toggleLed(!isLedOn)}>
                                     <span className="light-icon"></span>
                                 </button>
                             </div>
@@ -258,7 +160,7 @@ const Page = () => {
                                 <p>Trạng thái quạt</p>
                                 <img className="btn-icon-den" src={isFanOn ? urlFanOn : urlFanOff} alt="Bulb" />
                                 <br />
-                                <button className={`light-btn ${isFanOn ? 'on' : 'off'}`} onClick={toggleFan}>
+                                <button className={`light-btn ${isFanOn ? 'on' : 'off'}`} onClick={() => toggleFan(!isFanOn)}>
                                     <span className="light-icon"></span>
                                 </button>
                             </div>
@@ -269,7 +171,7 @@ const Page = () => {
                                 <p>Trạng thái điều hòa</p>
                                 <img className="btn-icon-den" src={isAirOn ? urlAirOn : urlAirOff} alt="Bulb" />
                                 <br />
-                                <button className={`light-btn ${isAirOn ? 'on' : 'off'}`} onClick={toggleAir}>
+                                <button className={`light-btn ${isAirOn ? 'on' : 'off'}`} onClick={() => toggleAir(!isAirOn)}>
                                     <span className="light-icon"></span>
                                 </button>
                             </div>

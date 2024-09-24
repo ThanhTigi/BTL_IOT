@@ -15,12 +15,12 @@ DHT dht(dhtpin, dhttype);
 
 
 // Thông tin mạng WiFi
-const char* ssid = "TiGii";
-const char* password = "12345689";
+const char* ssid = "P603-2.4Ghz";
+const char* password = "hoilamgi";
 
 // MQTT Server
-const char *mqtt_broker = "broker.emqx.io";
-const int mqtt_port = 1883;
+const char *mqtt_broker = "192.168.1.244";
+const int mqtt_port = 1993;
 const char* mqtt_user = "thanh";  // Username MQTT
 const char* mqtt_pass = "678";  // Password MQTT
 const char* topicIotWeather = "iot/weather";
@@ -98,7 +98,7 @@ void setup() {
     client_id += String(WiFi.macAddress());
     Serial.printf("The client %s connects to the public MQTT broker\n", client_id.c_str());
 
-    if (client.connect(client_id.c_str())) {
+    if (client.connect(client_id.c_str(),mqtt_user,mqtt_pass)) {
       Serial.println("Public EMQX MQTT broker connected");
       // isConnected = true;
     } else {
@@ -112,37 +112,48 @@ void setup() {
       client.subscribe(TOPIC_CONTROL_AIR); 
 }
 
+unsigned long previousMillis = 0;  // Biến lưu thời gian trước đó
+const long interval = 2000;  // Khoảng thời gian giữa các lần gửi dữ liệu (30 giây)
+
 void loop() {
-  client.loop();  // Lắng nghe lệnh từ MQTT
-  // Đọc nhiệt độ, độ ẩm, ánh sáng
-  float humidity = dht.readHumidity();
-  float temperature = dht.readTemperature();
-  int sensorValue = analogRead(LDR_PIN);  
-  float voltage = sensorValue * (3.3 / 4095.0);  // Chuyển đổi giá trị ADC sang điện áp (0 - 3.3V)
-  float lux = (2500 / voltage - 500) / 3.3;  // Công thức chuyển đổi gần đúng từ điện áp sang lux
-  if (lux > 200000) {
-    lux = 200000;
+  client.loop();  // Lắng nghe các tin nhắn từ MQTT
+
+  // Lấy thời gian hiện tại
+  unsigned long currentMillis = millis();
+
+  // Kiểm tra nếu đã đủ 30 giây kể từ lần gửi dữ liệu trước
+  if (currentMillis - previousMillis >= interval) {
+    // Cập nhật thời gian của lần gửi dữ liệu mới
+    previousMillis = currentMillis;
+
+    // Đọc nhiệt độ, độ ẩm, ánh sáng
+    float humidity = dht.readHumidity();
+    float temperature = dht.readTemperature();
+    int sensorValue = analogRead(LDR_PIN);
+    float voltage = sensorValue * (3.3 / 4095.0);  // Chuyển đổi giá trị ADC sang điện áp (0 - 3.3V)
+    float lux = (2500 / voltage - 500) / 3.3;  // Công thức chuyển đổi gần đúng từ điện áp sang lux
+    if (lux > 200000) {
+      lux = 200000;
+    }
+    float light = lux;
+
+    // Chuyển dữ liệu sang chuỗi để publish qua JSON
+    String temperature_payload = String(int(temperature));
+    String humidity_payload = String(int(humidity));
+    String light_payload = String(int(light));
+
+    // Thêm dữ liệu vào JSON
+    StaticJsonDocument<200> weatherJson;
+    weatherJson["temperature"] = temperature_payload;
+    weatherJson["humidity"] = humidity_payload;
+    weatherJson["light"] = light_payload;
+
+    // Chuyển đổi JSON thành chuỗi và gửi lên MQTT
+    char weatherJsonStr[200];
+    serializeJson(weatherJson, weatherJsonStr);
+    Serial.println(weatherJsonStr);
+    client.publish(topicIotWeather, weatherJsonStr);
   }
-  float light = lux;
-  float dust = random(1, 100);
-
-  // Chuyển dữ liệu sang chuỗi để publish qua json
-  String temperature_payload = String(int(temperature));
-  String humidity_payload = String(int(humidity));
-  String light_payload = String(int(light));
-  String dust_payload = String(int(dust));
-
-  // Thêm dữ liệu vào JSON
-  StaticJsonDocument<200> weatherJson;
-  weatherJson["temperature"] = temperature_payload;
-  weatherJson["humidity"] = humidity_payload;
-  weatherJson["light"] = light_payload;
-  weatherJson["dust"] = dust_payload;
-
-  // Chuyển đổi JSON thành chuỗi và gửi lên MQTT
-  char weatherJsonStr[200];
-  serializeJson(weatherJson, weatherJsonStr);
-  Serial.println(weatherJsonStr);
-  client.publish(topicIotWeather, weatherJsonStr);
-  delay(5000);  // Gửi dữ liệu mỗi 30 giây
+  
+  // client.loop() sẽ được chạy liên tục để lắng nghe các tin nhắn từ MQTT
 }

@@ -7,15 +7,13 @@ public class Sensor {
     String temperature;
     String humidity;
     String light;
-    String dust;
     Timestamp date;
 
-    public Sensor(int id, String temperature, String humidity, String light, String dust, Timestamp date) {
+    public Sensor(int id, String temperature, String humidity, String light, Timestamp date) {
         this.id = id;
         this.temperature = temperature;
         this.humidity = humidity;
         this.light = light;
-        this.dust = dust;
         this.date = date;
     }
 
@@ -51,13 +49,6 @@ public class Sensor {
         this.light = light;
     }
 
-    public String getDust() {
-        return dust;
-    }
-
-    public void setDust(String dust) {
-        this.dust = dust;
-    }
 
     public Timestamp getDate() {
         return date;
@@ -67,3 +58,4 @@ public class Sensor {
         this.date = date;
     }
 }
+

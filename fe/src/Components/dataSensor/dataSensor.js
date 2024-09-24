@@ -43,36 +43,13 @@ function DataSensor() {
                 });
         }
 
-        client.subscribe(TOPIC_IOT_WEATHER);
-        client.on('message', (topic, message) => {
-            const sensorData = JSON.parse(message.toString());
-            if (sensorData.temperature !== undefined && sensorData.humidity !== undefined && sensorData.light !== undefined && sensorData.dust !== undefined) {
-                handleData(sensorData);
-            }
-        });
-
         const interval = setInterval(callapi, 2000);
         return () => {
             clearInterval(interval);
-            client.unsubscribe(TOPIC_IOT_WEATHER);
         };
     }, [currentPage, isClear, searchClicked, rowsPerPage]); // Thêm rowsPerPage vào dependency array
 
-    const handleData = (data) => {
-        if (!isUpload) {
-            setIsUpload(true);
-            axios.post('http://localhost:8080/add-sensor', data)
-                .then((response) => {
-                    console.log('Dữ liệu đã được gửi thành công:', response.data);
-                })
-                .catch((error) => {
-                    console.error('Đã xảy ra lỗi khi gửi dữ liệu:', error);
-                })
-                .finally(() => {
-                    setIsUpload(false);
-                });
-        }
-    };
+
 
     const handleSearch = () => {
         if (temperatureInput !== '' || humidityInput !== '' || lightInput !== '') {
