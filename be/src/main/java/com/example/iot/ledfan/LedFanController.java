@@ -60,31 +60,6 @@ public class LedFanController extends Controller {
         return ledFan;
     }
 
-    @GetMapping("/searchfanlight")
-    public List<LedFan> getFanLed(Model model, @RequestParam("startTime") Timestamp startTime, @RequestParam("endTime") Timestamp endTime) {
-        List<LedFan> ledFans = new ArrayList<>();
-
-        try {
-            String query = "SELECT * FROM ledFan WHERE date BETWEEN ? AND ?";
-            PreparedStatement ps = connection.prepareStatement(query);
-            ps.setTimestamp(1, startTime);
-            ps.setTimestamp(2, endTime);
-            ResultSet rs = ps.executeQuery();
-
-            while (rs.next()) {
-                int id = rs.getInt("id");
-                String name = rs.getString("name");
-                String status = rs.getString("status");
-                Timestamp date = rs.getTimestamp("date");
-                ledFans.add(new LedFan(id, name, status, date));
-            }
-            ps.close();
-        } catch (Exception ex) {
-            ex.printStackTrace();
-        }
-
-        return ledFans;
-    }
 
 
 }

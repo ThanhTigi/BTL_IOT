@@ -4,8 +4,13 @@ import com.example.iot.Controller;
 import com.example.iot.MQTTController;
 import com.example.iot.ledfan.LedFan;
 import com.example.iot.ledfan.LedFanController;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
@@ -47,16 +52,26 @@ public class SensorController extends Controller {
     }
 
 
-    public static void addSensorData(Sensor sensor) throws SQLException {
-        sensor.setDate(Timestamp.valueOf(LocalDateTime.now()));
+    public static void addSensorData(String dataString) throws SQLException, ParseException {
+        System.out.println("add sensor data: " + dataString);
+        // Tạo JSON parser
+        JSONParser parser = new JSONParser();
+        JSONObject jsonObject = (JSONObject) parser.parse(dataString);
+        // Lấy giá trị từ JSONObject dưới dạng String
+        String temperature = (String) jsonObject.get("temperature");
+        String humidity = (String) jsonObject.get("humidity");
+        String light = (String) jsonObject.get("light");
 
-        String query = "INSERT INTO sensor VALUES(?, ?, ?, ?, ?, ?)";
+        // Tạo đối tượng Sensor
+        Sensor sensor = new Sensor(0, temperature, humidity, light, Timestamp.valueOf(LocalDateTime.now()));
+
+        String query = "INSERT INTO sensor VALUES(?, ?, ?, ?, ?)";
         PreparedStatement ps = connection.prepareStatement(query);
         ps.setInt(1, sensor.getId());
         ps.setString(2, sensor.getTemperature());
         ps.setString(3, sensor.getHumidity());
         ps.setString(4, sensor.getLight());
-        ps.setTimestamp(6, sensor.getDate());
+        ps.setTimestamp(5, sensor.getDate());
         ps.executeUpdate();
         ps.close();
     }
@@ -105,15 +120,16 @@ public class SensorController extends Controller {
     }
 
     @GetMapping("/get-sensor")
-    public String getSensor()
-    {
-        return MQTTController.weatherJson;
+    public String getSensor() throws SQLException, ParseException {
+        String weatherJson = MQTTController.weatherJson;
+        return weatherJson;
     }
+
+
 
     @PostMapping("/set-light-led")
     public boolean setLightLed(@RequestBody Map<String, Boolean> payload) throws MqttException, SQLException {
         boolean lightStatus = payload.get("lightStatus");
-        System.out.println("Setting light-led...");
         // Pub một tin nhắn MQTT
         MQTTController.SetLightOn(lightStatus);
         LedFan ledFan = new LedFan(0,"Led",lightStatus ? "Bật" : "Tắt",Timestamp.valueOf(LocalDateTime.now()));
@@ -124,7 +140,6 @@ public class SensorController extends Controller {
     @PostMapping("/set-fan-led")
     public boolean setFanLed(@RequestBody Map<String, Boolean> payload) throws MqttException, SQLException {
         boolean fanStatus = payload.get("fanStatus");
-        System.out.println("Setting fan-led...");
         // Pub một tin nhắn MQTT
         MQTTController.SetFanOn(fanStatus);
         LedFan ledFan = new LedFan(0,"Fan",fanStatus ? "Bật" : "Tắt",Timestamp.valueOf(LocalDateTime.now()));
@@ -135,7 +150,6 @@ public class SensorController extends Controller {
     @PostMapping("/set-air-led")
     public boolean setAirLed(@RequestBody Map<String, Boolean> payload) throws MqttException, SQLException {
         boolean airStatus = payload.get("airStatus");
-        System.out.println("Setting air-led...");
         // Pub một tin nhắn MQTT
         MQTTController.SetAirOn(airStatus);
         LedFan ledFan = new LedFan(0,"Air",airStatus ? "Bật" : "Tắt",Timestamp.valueOf(LocalDateTime.now()));

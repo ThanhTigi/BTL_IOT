@@ -9,7 +9,7 @@ function DataLedFan() {
     const [thoigiandata, setThoigiandata] = useState('');
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
-    const [tempInputPage, setTempInputPage] = useState(''); 
+    const [tempInputPage, setTempInputPage] = useState('');
     const [searchClicked, setSearchClicked] = useState(false);
     const [isValidFormat, setIsValidFormat] = useState(true);
     const [rowsPerPage, setRowsPerPage] = useState(20); // State để điều chỉnh số lượng hàng
@@ -23,43 +23,34 @@ function DataLedFan() {
                 data.forEach((item) => {
                     item.date = moment(item.date).format('YYYY-MM-DD HH:mm:ss');
                 });
-    
+
                 // Đảo ngược các bản ghi nhưng giữ nguyên cột ID
                 const reversedData = data.map((item, index, array) => ({
                     ...array[array.length - 1 - index],  // Lấy phần tử từ cuối của mảng đảo ngược
                     id: item.id  // Giữ nguyên ID từ bản gốc
                 }));
-    
+
                 const totalPages = Math.ceil(reversedData.length / rowsPerPage);
                 setTotalPages(totalPages);
-    
+
                 // Cắt lát dữ liệu dựa trên trang hiện tại và rowsPerPage
                 const startIndex = (currentPage - 1) * rowsPerPage;
                 const endIndex = startIndex + rowsPerPage;
                 const slicedData = reversedData.slice(startIndex, endIndex);
-    
+
                 setHistoryfanlight(slicedData);
             })
             .catch((error) => {
                 console.error('Lỗi khi gửi yêu cầu API:', error);
             });
     }, [currentPage, searchClicked, thoigiandata, rowsPerPage]);
-    
-    
-    
+
+
+
     const handlePageInputChange = (e) => {
-        setTempInputPage(e.target.value); 
+        setTempInputPage(e.target.value);
     };
 
-    const handlePageInputEnter = (e) => {
-        if (e.key === 'Enter') {
-            const newPage = parseInt(e.target.value, 10);
-            if (newPage >= 1 && newPage <= totalPages) {
-                setCurrentPage(newPage);
-                setTempInputPage('');
-            }
-        }
-    };
 
     const handleUpdateRowsPerPage = () => {
         const newRowsPerPage = parseInt(tempInputPage, 10);
@@ -68,29 +59,6 @@ function DataLedFan() {
             setCurrentPage(1); // Reset về trang đầu
         }
         setTempInputPage(''); // Xóa ô nhập sau khi cập nhật
-    };
-
-    const handleSearch = () => {
-        if (thoigian !== '') {
-            if (isValidDateFormat(thoigian)) {
-                setSearchClicked(true);
-                setThoigiandata(thoigian.trim());
-                setIsValidFormat(true);
-            } else {
-                setIsValidFormat(isValidDateFormat(thoigian));
-            }
-        } else {
-            setSearchClicked(false);
-            setIsValidFormat(true);
-        }
-        setCurrentPage(1);
-    };
-
-    const handleExit = () => {
-        setCurrentPage(1);
-        setSearchClicked(false);
-        setIsValidFormat(true);
-        setThoigian('');
     };
 
     function isValidDateFormat(input) {
@@ -105,7 +73,6 @@ function DataLedFan() {
             </div>
             <div className='container-data'>
                 <h1>Lịch sử bật tắt thiết bị</h1>
-
                 <div>
                     <label htmlFor="rowsPerPageInput">Số hàng mỗi trang: </label>
                     <input

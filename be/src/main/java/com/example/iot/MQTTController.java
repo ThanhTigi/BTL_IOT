@@ -3,7 +3,6 @@ package com.example.iot;
 import com.example.iot.sensor.Sensor;
 import com.example.iot.sensor.SensorController;
 import com.example.iot.sensor.SensorJson;
-import com.google.gson.Gson;
 import org.eclipse.paho.client.mqttv3.MqttClient;
 import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
 import org.eclipse.paho.client.mqttv3.MqttException;
@@ -12,6 +11,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 
@@ -39,25 +39,20 @@ public class MQTTController{
             client.subscribe(weatherTopic, (receivedTopic, msg) -> {
                 String message = new String(msg.getPayload());
                 weatherJson = message;
-
-//                Gson gson = new Gson();
-//                SensorJson sensorJson = gson.fromJson(weatherJson, SensorJson.class);
-//                Sensor newSensor = new Sensor(0, sensorJson.getTemperature(),sensorJson.getHumidity(),sensorJson.getLight(), Timestamp.valueOf(LocalDateTime.now()));
-//                SensorController.addSensorData(newSensor);
+                SensorController.addSensorData(weatherJson);
             });
-
 
         } catch (MqttException e) {
             e.printStackTrace();
         }
     }
 
+
     public static void SetLightOn(boolean lightStatus) throws MqttException {
         String payload = lightStatus ? "On" : "Off";
         MqttMessage message = new MqttMessage(payload.getBytes());
         message.setQos(2); // Quality of Service
         client.publish(TOPIC_CONTROL_LED, message);
-        System.out.println("Message published: " + payload);
     }
 
     public static void SetFanOn(boolean fanStatus) throws MqttException {
@@ -65,7 +60,6 @@ public class MQTTController{
         MqttMessage message = new MqttMessage(payload.getBytes());
         message.setQos(2); // Quality of Service
         client.publish(TOPIC_CONTROL_FAN, message);
-        System.out.println("Message published: " + payload);
     }
 
     public static void SetAirOn(boolean airStatus) throws MqttException {
@@ -73,7 +67,6 @@ public class MQTTController{
         MqttMessage message = new MqttMessage(payload.getBytes());
         message.setQos(2); // Quality of Service
         client.publish(TOPIC_CONTROL_AIR, message);
-        System.out.println("Message published: " + payload);
     }
 
 }

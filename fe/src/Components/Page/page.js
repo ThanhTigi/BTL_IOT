@@ -43,23 +43,6 @@ const Page = () => {
     },[]
     )
 
-    setInterval(() => {
-        fetch(`http://localhost:8080/get-sensor`)
-        .then((response) => response.json())
-                .then((datasub) => {
-
-                // Kiểm tra nếu có các trường như 'temperature', 'humidity' và 'light' trong dữ liệu nhận được
-                if (datasub.temperature !== undefined && datasub.humidity !== undefined && datasub.light !== undefined) {
-                    setTemperature(datasub.temperature);
-                    setHumidity(datasub.humidity);
-                    setLight(datasub.light);
-                }
-                })
-                .catch((error) => {
-                    console.error('Lỗi khi gửi yêu cầu API:', error);
-                });
-    }, 2000);
-
 
     // Hàm bật/tắt đèn
     const toggleLed = (status) => {
@@ -80,6 +63,34 @@ const Page = () => {
             });
     };
 
+    useEffect(() => {
+        const interval = setInterval(() => {
+            console.log("get sensor data");
+            fetch(`http://localhost:8080/get-sensor`)
+                .then((response) => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
+                .then((datasub) => {
+                    // Kiểm tra nếu có các trường như 'temperature', 'humidity' và 'light' trong dữ liệu nhận được
+                    if (datasub.temperature !== undefined && datasub.humidity !== undefined && datasub.light !== undefined) {
+                        setTemperature(datasub.temperature);
+                        setHumidity(datasub.humidity);
+                        setLight(datasub.light);
+                    }
+                })
+                .catch((error) => {
+                    console.error('Lỗi khi gửi yêu cầu API:', error);
+                });
+        }, 2000);
+
+        // Dọn dẹp interval khi component unmount
+        return () => clearInterval(interval);
+    }, []);
+
+    
     // Hàm bật/tắt quạt
     const toggleFan = (status) => {
         fetch('http://localhost:8080/set-fan-led', {

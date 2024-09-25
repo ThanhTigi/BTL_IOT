@@ -28,6 +28,12 @@ const Myprofile = () => {
                 <FontAwesomeIcon icon={faGithub} className="icon" />
                 Github: <a href="https://github.com/ThanhTigi/BTL_IOT" target="_blank" rel="noopener noreferrer">https://github.com/ThanhTigi/BTL_IOT</a>
             </div>
+            <div className="mythongtin">
+                PDF: 
+            </div>
+            <div className="mythongtin">
+                APIDocs: 
+            </div>
         </div>
     );
 }

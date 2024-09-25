@@ -28,26 +28,29 @@ function DataSensor() {
             fetch(`http://localhost:8080/${searchClicked ? `search-sensor?temperature=${temperatureInput}&humidity=${humidityInput}&light=${lightInput}` : `sensors`}`)
                 .then((response) => response.json())
                 .then((data) => {
-                    data.forEach((item) => {
+                    data.forEach((item, index) => {
+                        item.id = index + 1; // Gán ID bắt đầu từ 1
                         item.date = moment(item.date).format('YYYY-MM-DD HH:mm:ss');
                     });
-
+    
                     setTotalPages(Math.ceil(data.length / rowsPerPage)); // Tính tổng số trang
                     const startIndex = (currentPage - 1) * rowsPerPage;
                     const endIndex = startIndex + rowsPerPage;
                     const slicedData = data.slice(startIndex, endIndex);
+                    
+                    // Không cần sắp xếp lại vì ID đã được gán từ bé đến lớn
                     setListDataSensor(slicedData);
                 })
                 .catch((error) => {
                     console.error('Lỗi khi gửi yêu cầu API:', error);
                 });
         }
-
+    
         const interval = setInterval(callapi, 2000);
         return () => {
             clearInterval(interval);
         };
-    }, [currentPage, isClear, searchClicked, rowsPerPage]); // Thêm rowsPerPage vào dependency array
+    }, [currentPage, isClear, searchClicked, rowsPerPage]);     // Thêm rowsPerPage vào dependency array
 
 
 
@@ -58,6 +61,34 @@ function DataSensor() {
             setSearchClicked(false);
         }
         setCurrentPage(1);
+    };
+
+    const handleExit = () => {
+        setCurrentPage(1);
+        setSearchClicked(false);
+        setTemperatureInput('');
+        setHumidityInput('');
+        setLightInput('');
+    };
+
+    const handleClear = () => {
+        if (!isClear) {
+            setIsClear(true);
+
+            fetch(`http://localhost:8080/clear-sensor`)
+                .then((response) => {
+                    console.log('Dữ liệu đã được xóa thành công:');
+                    // Thực hiện các hành động khác sau khi xóa dữ liệu thành công (nếu cần)
+                })
+                .catch((error) => {
+                    console.error('Đã xảy ra lỗi khi xóa dữ liệu:', error);
+                    // Xử lý lỗi (nếu cần)
+                })
+                .finally(() => {
+                    // de refesh lai trang
+                    setIsClear(false);
+                });
+        }
     };
 
     const handleUpdateRowsPerPage = () => {
@@ -99,6 +130,8 @@ function DataSensor() {
                         onChange={(e) => setLightInput(e.target.value)}
                     />
                     <button className='btn-exit btn-exit-search bi bi-search' onClick={handleSearch}>Tìm kiếm</button>
+                    <button className='btn-exit btn-exit-exit bi bi-card-list' onClick={() => handleExit()}> Tất cả</button>
+                    <button className='btn-exit btn-exit-clear bi bi-trash' onClick={() => handleClear()}> Xóa dữ liệu</button>
                 </div>
 
                 {/* Ô nhập số hàng mỗi trang */}
