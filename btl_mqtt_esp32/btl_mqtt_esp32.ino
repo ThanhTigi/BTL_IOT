@@ -19,7 +19,7 @@ const char* ssid = "P603-2.4Ghz";
 const char* password = "hoilamgi";
 
 // MQTT Server
-const char *mqtt_broker = "192.168.1.244";
+const char *mqtt_broker = "192.168.1.244"; // Phong 192.168.1.244 DT 192.168.43.105
 const int mqtt_port = 1993;
 const char* mqtt_user = "thanh";  // Username MQTT
 const char* mqtt_pass = "678";  // Password MQTT
@@ -40,33 +40,34 @@ void callback(char* topic, byte* payload, unsigned int length) {
   for (int i = 0; i < length; i++) {
     message += (char)payload[i];
   }
-
+  Serial.print(" Messenger: " );
+  Serial.println(message);
   if (String(topic) == TOPIC_CONTROL_LED) {
     // Điều khiển đèn từ MQTT
-    if (message == "Bật") {
+    if (message == "On") {
       digitalWrite(LIGHT_PIN, HIGH);  // Bật đèn
       client.publish(mqtt_status_topic, "light_on_success");
-    } else if (message == "Tắt") {
+    } else if (message == "Off") {
       digitalWrite(LIGHT_PIN, LOW);  // Tắt đèn
       client.publish(mqtt_status_topic, "light_off_success");
     } 
   }
   else if (String(topic) == TOPIC_CONTROL_FAN) {
     // Điều khiển quạt từ MQTT
-    if (message == "Bật") {
+    if (message == "On") {
       digitalWrite(FAN_PIN, HIGH);  // Bật quạt
       client.publish(mqtt_status_topic, "fan_on_success");
-    } else if (message == "Tắt") {
+    } else if (message == "Off") {
       digitalWrite(FAN_PIN, LOW);  // Tắt quạt
       client.publish(mqtt_status_topic, "fan_off_success");
     } 
   }
   else if (String(topic) == TOPIC_CONTROL_AIR) {
     // Điều khiển điều hòa từ MQTT
-    if (message == "Bật") {
+    if (message == "On") {
       digitalWrite(AC_PIN, HIGH);  // Bật điều hòa
       client.publish(mqtt_status_topic, "air_on_success");
-    } else if (message == "Tắt") {
+    } else if (message == "Off") {
       digitalWrite(AC_PIN, LOW);  // Tắt điều hòa
       client.publish(mqtt_status_topic, "air_ff_success");
     } 

@@ -53,7 +53,7 @@ public class MQTTController{
     }
 
     public static void SetLightOn(boolean lightStatus) throws MqttException {
-        String payload = lightStatus ? "Bật" : "Tắt";
+        String payload = lightStatus ? "On" : "Off";
         MqttMessage message = new MqttMessage(payload.getBytes());
         message.setQos(2); // Quality of Service
         client.publish(TOPIC_CONTROL_LED, message);
@@ -61,7 +61,7 @@ public class MQTTController{
     }
 
     public static void SetFanOn(boolean fanStatus) throws MqttException {
-        String payload = fanStatus ? "Bật" : "Tắt";
+        String payload = fanStatus ? "On" : "Off";
         MqttMessage message = new MqttMessage(payload.getBytes());
         message.setQos(2); // Quality of Service
         client.publish(TOPIC_CONTROL_FAN, message);
@@ -69,7 +69,7 @@ public class MQTTController{
     }
 
     public static void SetAirOn(boolean airStatus) throws MqttException {
-        String payload = airStatus ? "Bật" : "Tắt";
+        String payload = airStatus ? "On" : "Off";
         MqttMessage message = new MqttMessage(payload.getBytes());
         message.setQos(2); // Quality of Service
         client.publish(TOPIC_CONTROL_AIR, message);
