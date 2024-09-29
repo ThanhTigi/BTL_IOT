@@ -132,7 +132,7 @@ public class SensorController extends Controller {
         boolean lightStatus = payload.get("lightStatus");
         // Pub một tin nhắn MQTT
         MQTTController.SetLightOn(lightStatus);
-        LedFan ledFan = new LedFan(0,"Led",lightStatus ? "Bật" : "Tắt",Timestamp.valueOf(LocalDateTime.now()));
+        LedFan ledFan = new LedFan(0,"Đèn",lightStatus ? "Bật" : "Tắt",Timestamp.valueOf(LocalDateTime.now()));
         LedFanController.addLedFan(ledFan);
         return lightStatus;
     }
@@ -142,7 +142,7 @@ public class SensorController extends Controller {
         boolean fanStatus = payload.get("fanStatus");
         // Pub một tin nhắn MQTT
         MQTTController.SetFanOn(fanStatus);
-        LedFan ledFan = new LedFan(0,"Fan",fanStatus ? "Bật" : "Tắt",Timestamp.valueOf(LocalDateTime.now()));
+        LedFan ledFan = new LedFan(0,"Quạt",fanStatus ? "Bật" : "Tắt",Timestamp.valueOf(LocalDateTime.now()));
         LedFanController.addLedFan(ledFan);
         return fanStatus;
     }
@@ -152,7 +152,7 @@ public class SensorController extends Controller {
         boolean airStatus = payload.get("airStatus");
         // Pub một tin nhắn MQTT
         MQTTController.SetAirOn(airStatus);
-        LedFan ledFan = new LedFan(0,"Air",airStatus ? "Bật" : "Tắt",Timestamp.valueOf(LocalDateTime.now()));
+        LedFan ledFan = new LedFan(0,"Điều hòa",airStatus ? "Bật" : "Tắt",Timestamp.valueOf(LocalDateTime.now()));
         LedFanController.addLedFan(ledFan);
         return airStatus;
     }

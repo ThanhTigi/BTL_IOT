@@ -133,9 +133,8 @@ function DataSensor() {
                     <button className='btn-exit btn-exit-exit bi bi-card-list' onClick={() => handleExit()}> Tất cả</button>
                     <button className='btn-exit btn-exit-clear bi bi-trash' onClick={() => handleClear()}> Xóa dữ liệu</button>
                 </div>
-
                 {/* Ô nhập số hàng mỗi trang */}
-                <div>
+                <div className='rows-per-page'>
                     <label htmlFor="rowsPerPageInput">Số hàng mỗi trang: </label>
                     <input
                         id="rowsPerPageInput"
@@ -144,9 +143,9 @@ function DataSensor() {
                         onChange={(e) => setTempInputPage(e.target.value)}
                         min="1"
                     />
-                    <button onClick={handleUpdateRowsPerPage}>OK</button>
+                    <button className='btn-ok' onClick={handleUpdateRowsPerPage}>OK</button>
                 </div>
-
+    
                 {listDataSensor && (
                     <table>
                         <thead>
@@ -171,7 +170,10 @@ function DataSensor() {
                         </tbody>
                     </table>
                 )}
-
+    
+                
+    
+                {/* Phân trang */}
                 <div className="pagination">
                     <button
                         className='btn-truoc'
@@ -228,6 +230,7 @@ function DataSensor() {
             </div>
         </div>
     );
+    
 }
 
 export default DataSensor;

@@ -1,26 +1,24 @@
 import React, { useState, useEffect } from 'react';
 import Menu from '../menu/menu';
 import moment from 'moment';
-import "./dataLedFan.css"
+import './dataLedFan.css';
 
 function DataLedFan() {
     const [historyfanlight, setHistoryfanlight] = useState(null);
-    const [thoigian, setThoigian] = useState('');
-    const [thoigiandata, setThoigiandata] = useState('');
+    const [deviceName, setDeviceName] = useState(''); // State để lưu tên thiết bị
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
     const [tempInputPage, setTempInputPage] = useState('');
-    const [searchClicked, setSearchClicked] = useState(false);
-    const [isValidFormat, setIsValidFormat] = useState(true);
     const [rowsPerPage, setRowsPerPage] = useState(20); // State để điều chỉnh số lượng hàng
 
     useEffect(() => {
         // Gửi yêu cầu API và lấy dữ liệu
-        fetch(`http://localhost:8080/${searchClicked ? `searchfanlight?startTime=${thoigian} 00:00:00&endTime=${thoigian} 23:59:59` : `fanlights`}`)
+        fetch(`http://localhost:8080/fanlights${deviceName ? `/search?deviceName=${deviceName}` : ''}`)
             .then((response) => response.json())
             .then((data) => {
                 // Format lại thời gian cho từng phần tử
-                data.forEach((item) => {
+                data.forEach((item,index) => {
+                    item.id = index +1;
                     item.date = moment(item.date).format('YYYY-MM-DD HH:mm:ss');
                 });
 
@@ -43,14 +41,11 @@ function DataLedFan() {
             .catch((error) => {
                 console.error('Lỗi khi gửi yêu cầu API:', error);
             });
-    }, [currentPage, searchClicked, thoigiandata, rowsPerPage]);
-
-
+    }, [currentPage, deviceName, rowsPerPage]);
 
     const handlePageInputChange = (e) => {
         setTempInputPage(e.target.value);
     };
-
 
     const handleUpdateRowsPerPage = () => {
         const newRowsPerPage = parseInt(tempInputPage, 10);
@@ -61,10 +56,32 @@ function DataLedFan() {
         setTempInputPage(''); // Xóa ô nhập sau khi cập nhật
     };
 
-    function isValidDateFormat(input) {
-        const dateFormat = /^\d{4}-\d{2}-\d{2}$/;
-        return dateFormat.test(input);
-    }
+    const handleSearch = (dev) => {
+        setCurrentPage(1); // Reset về trang đầu khi tìm kiếm
+    };
+
+    const handleShowAll = () => {
+        setDeviceName(''); // Đặt lại tên thiết bị về rỗng để hiển thị tất cả
+        setCurrentPage(1); // Reset về trang đầu
+    };
+
+    const handleDeleteData = () => {
+        fetch(`http://localhost:8080/deleteAll`, {
+            method: 'DELETE'
+        })
+            .then(response => {
+                if (response.ok) {
+                    // Sau khi xóa thành công, gọi lại API để lấy dữ liệu mới
+                    setHistoryfanlight([]);
+                    setCurrentPage(1);
+                } else {
+                    console.error('Lỗi khi xóa dữ liệu');
+                }
+            })
+            .catch((error) => {
+                console.error('Lỗi khi gửi yêu cầu xóa:', error);
+            });
+    };
 
     return (
         <div>
@@ -73,16 +90,29 @@ function DataLedFan() {
             </div>
             <div className='container-data'>
                 <h1>Lịch sử bật tắt thiết bị</h1>
+
+                {/* Tìm kiếm theo tên thiết bị */}
                 <div>
-                    <label htmlFor="rowsPerPageInput">Số hàng mỗi trang: </label>
-                    <input
+                    <select value={deviceName} onChange={(e) => setDeviceName(e.target.value)}>
+                        <option value="">Chọn thiết bị</option>
+                        <option value="đèn">Đèn</option>
+                        <option value="quạt">Quạt</option>
+                        <option value="điều hòa">Điều hòa</option>
+                    </select>
+                    <button className='btn-exit btn-exit-clear bi bi-trash' onClick={handleDeleteData}>Xóa dữ liệu</button> {/* Nút Xóa dữ liệu */}
+                               
+                </div>
+                <br></br>
+                <div className='rows-per-page'>
+                <label htmlFor="rowsPerPageInput">Số hàng mỗi trang: </label>
+                <input
                         id="rowsPerPageInput"
                         type="number"
                         value={tempInputPage}
                         onChange={handlePageInputChange}
                         min="1"
                     />
-                    <button onClick={handleUpdateRowsPerPage}>OK</button> {/* Nút OK để cập nhật */}
+                    <button className='btn-ok' onClick={handleUpdateRowsPerPage}>OK</button> {/* Nút OK để cập nhật */}
                 </div>
 
                 {historyfanlight && (
@@ -90,7 +120,7 @@ function DataLedFan() {
                         <thead>
                             <tr>
                                 <th>ID</th>
-                                <th>Tên thiết bị </th>
+                                <th>Tên thiết bị</th>
                                 <th>Trạng thái</th>
                                 <th>Thời gian</th>
                             </tr>
