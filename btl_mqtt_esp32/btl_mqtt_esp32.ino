@@ -9,17 +9,16 @@ DHT dht(dhtpin, dhttype);
 
 #define LDR_PIN 32  // Chân ADC để đọc tín hiệu từ LDR
 
-#define FAN_PIN 4    // LED đại diện cho quạt
-#define AC_PIN 5    // LED đại diện cho điều hòa
-#define LIGHT_PIN 2   // LED đại diện cho đèn
-
+#define FAN_PIN 4   
+#define AC_PIN 5    
+#define LIGHT_PIN 2   
 
 // Thông tin mạng WiFi
-const char* ssid = "P603-2.4Ghz";
-const char* password = "hoilamgi";
+const char* ssid = "TiGii";
+const char* password = "12345689";
 
 // MQTT Server
-const char *mqtt_broker = "192.168.1.244"; // Phong 192.168.1.244 DT 192.168.43.105
+const char *mqtt_broker = "192.168.43.105"; // Phong 192.168.1.244 DT 192.168.43.105
 const int mqtt_port = 1993;
 const char* mqtt_user = "thanh";  // Username MQTT
 const char* mqtt_pass = "678";  // Password MQTT
@@ -114,7 +113,7 @@ void setup() {
 }
 
 unsigned long previousMillis = 0;  // Biến lưu thời gian trước đó
-const long interval = 2000;  // Khoảng thời gian giữa các lần gửi dữ liệu (30 giây)
+const long interval = 2000;  // Khoảng thời gian giữa các lần gửi dữ liệu (2 giây)
 
 void loop() {
   client.loop();  // Lắng nghe các tin nhắn từ MQTT
@@ -122,7 +121,7 @@ void loop() {
   // Lấy thời gian hiện tại
   unsigned long currentMillis = millis();
 
-  // Kiểm tra nếu đã đủ 30 giây kể từ lần gửi dữ liệu trước
+  // Kiểm tra nếu đã đủ 2 giây kể từ lần gửi dữ liệu trước
   if (currentMillis - previousMillis >= interval) {
     // Cập nhật thời gian của lần gửi dữ liệu mới
     previousMillis = currentMillis;

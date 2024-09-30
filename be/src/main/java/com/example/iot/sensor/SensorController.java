@@ -127,34 +127,5 @@ public class SensorController extends Controller {
 
 
 
-    @PostMapping("/set-light-led")
-    public boolean setLightLed(@RequestBody Map<String, Boolean> payload) throws MqttException, SQLException {
-        boolean lightStatus = payload.get("lightStatus");
-        // Pub một tin nhắn MQTT
-        MQTTController.SetLightOn(lightStatus);
-        LedFan ledFan = new LedFan(0,"Đèn",lightStatus ? "Bật" : "Tắt",Timestamp.valueOf(LocalDateTime.now()));
-        LedFanController.addLedFan(ledFan);
-        return lightStatus;
-    }
-
-    @PostMapping("/set-fan-led")
-    public boolean setFanLed(@RequestBody Map<String, Boolean> payload) throws MqttException, SQLException {
-        boolean fanStatus = payload.get("fanStatus");
-        // Pub một tin nhắn MQTT
-        MQTTController.SetFanOn(fanStatus);
-        LedFan ledFan = new LedFan(0,"Quạt",fanStatus ? "Bật" : "Tắt",Timestamp.valueOf(LocalDateTime.now()));
-        LedFanController.addLedFan(ledFan);
-        return fanStatus;
-    }
-
-    @PostMapping("/set-air-led")
-    public boolean setAirLed(@RequestBody Map<String, Boolean> payload) throws MqttException, SQLException {
-        boolean airStatus = payload.get("airStatus");
-        // Pub một tin nhắn MQTT
-        MQTTController.SetAirOn(airStatus);
-        LedFan ledFan = new LedFan(0,"Điều hòa",airStatus ? "Bật" : "Tắt",Timestamp.valueOf(LocalDateTime.now()));
-        LedFanController.addLedFan(ledFan);
-        return airStatus;
-    }
 
 }

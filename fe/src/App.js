@@ -2,13 +2,10 @@ import './App.css';
 import Page from './Components/Page/page';
 import { Routes, Route } from 'react-router-dom';
 import routes from './routes';
-import HookMqtt from './Components/Hook/HookMqtt';
 
 function App() {
   return (
     <div>
-
-      {/* <Page />, */}
       <Routes>
         {
           routes.map((item) => {
@@ -18,8 +15,6 @@ function App() {
           })
         }
       </Routes>
-
-      {/* <HookMqtt />, */}
     </div>
   )
 }

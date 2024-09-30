@@ -26,13 +26,13 @@ const Myprofile = () => {
             </div>
             <div className="mythongtin">
                 <FontAwesomeIcon icon={faGithub} className="icon" />
-                Github: <a href="https://github.com/ThanhTigi/BTL_IOT" target="_blank" rel="noopener noreferrer">https://github.com/ThanhTigi/BTL_IOT</a>
+                Github: <a href="https://github.com/ThanhTigi/BTL_IOT" target="_blank" rel="noopener noreferrer">Link Github</a>
             </div>
             <div className="mythongtin">
-                PDF: 
+                PDF: <a href="https://github.com/thiet003/IOT_2024" target="_blank" rel="noopener noreferrer">Link PDF</a>
             </div>
             <div className="mythongtin">
-                APIDocs: 
+                APIDocs:  <a href="https://github.com/thiet003/IOT_2024" target="_blank" rel="noopener noreferrer">Link APIDocs</a>
             </div>
         </div>
     );
