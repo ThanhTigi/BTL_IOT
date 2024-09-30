@@ -29,10 +29,10 @@ const Myprofile = () => {
                 Github: <a href="https://github.com/ThanhTigi/BTL_IOT" target="_blank" rel="noopener noreferrer">Link Github</a>
             </div>
             <div className="mythongtin">
-                PDF: <a href="https://github.com/thiet003/IOT_2024" target="_blank" rel="noopener noreferrer">Link PDF</a>
+                PDF: <a href="https://drive.google.com/file/d/1aaFpQO_DTU3EBnlALaS0DdJ3a6jeH0Mo/view?usp=sharing" target="_blank" rel="noopener noreferrer">Link PDF</a>
             </div>
             <div className="mythongtin">
-                APIDocs:  <a href="https://github.com/thiet003/IOT_2024" target="_blank" rel="noopener noreferrer">Link APIDocs</a>
+                APIDocs:  <a href="https://github.com/ThanhTigi/BTL_IOT/blob/main/APIDocs" target="_blank" rel="noopener noreferrer">Link APIDocs</a>
             </div>
         </div>
     );
