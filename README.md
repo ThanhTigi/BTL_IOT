@@ -34,22 +34,13 @@
 
 ### 2. Thiết Lập Backend
 
-1. Di chuyển tới thư mục backend:
+Di chuyển tới thư mục backend:
 
 ```bash
    cd be/
 ```
-Cài đặt các gói phụ thuộc:
 
-```bash
-npm install
-```
-Khởi động máy chủ:
-
-```bash
-node server.js
-```
-3. Thiết Lập Frontend
+### 3. Thiết Lập Frontend
 Di chuyển tới thư mục frontend:
 
 ```bash
@@ -65,17 +56,27 @@ Khởi động ứng dụng frontend:
 ```bash
 npm start
 ```
-Giao Diện Người Dùng
-Menu Chính: Cung cấp các tùy chọn như Dashboard, Data Sensor, Action History, và Profile.
-Dashboard: Hiển thị các thông số môi trường theo thời gian thực, cung cấp các nút điều khiển thiết bị điện.
-Data Sensor: Trình bày chi tiết dữ liệu thu thập từ các cảm biến, với các tính năng tìm kiếm và phân trang.
-Action History: Lưu trữ và quản lý lịch sử thao tác bật/tắt thiết bị điện.
-Profile: Hiển thị thông tin cá nhân của người dùng.
-Kết Quả Thực Nghiệm
-Phần Cứng: Hệ thống phần cứng đã hoạt động ổn định, với các cảm biến cung cấp dữ liệu chính xác và việc điều khiển thiết bị điện được thực hiện thành công.
-Frontend: Giao diện người dùng thân thiện, cho phép theo dõi và điều khiển thiết bị một cách linh hoạt và dễ dàng.
-Backend: Thành công trong việc kết nối với MQTT Broker, xử lý dữ liệu từ cảm biến, và quản lý cơ sở dữ liệu.
-Đóng Góp
+### Giao Diện Người Dùng
+
+## Menu Chính: Cung cấp các tùy chọn như Dashboard, Data Sensor, Action History, và Profile.
+
+## Dashboard: Hiển thị các thông số môi trường theo thời gian thực, cung cấp các nút điều khiển thiết bị điện.
+
+## Data Sensor: Trình bày chi tiết dữ liệu thu thập từ các cảm biến, với các tính năng tìm kiếm và phân trang.
+
+## Action History: Lưu trữ và quản lý lịch sử thao tác bật/tắt thiết bị điện.
+
+## Profile: Hiển thị thông tin cá nhân của người dùng.
+
+### Kết Quả Thực Nghiệm
+
+## Phần Cứng: Hệ thống phần cứng đã hoạt động ổn định, với các cảm biến cung cấp dữ liệu chính xác và việc điều khiển thiết bị điện được thực hiện thành công.
+
+## Frontend: Giao diện người dùng thân thiện, cho phép theo dõi và điều khiển thiết bị một cách linh hoạt và dễ dàng.
+
+## Backend: Thành công trong việc kết nối với MQTT Broker, xử lý dữ liệu từ cảm biến, và quản lý cơ sở dữ liệu.
+
+### Đóng Góp
 Mọi đóng góp cho dự án đều được hoan nghênh! Nếu bạn có bất kỳ vấn đề hoặc đề xuất nào, hãy thoải mái mở issue hoặc pull request. Sự tham gia của bạn sẽ giúp dự án phát triển mạnh mẽ hơn.
 
-Dự án được thực hiện với niềm đam mê và nhiệt huyết của sinh viên Nguyễn Đắc Thành - B21DCCN678 lớp D21CQCN06-B thuộc PTIT. Chúc bạn trải nghiệm thú vị cùng với dự án IoT này!
+### Dự án được thực hiện với niềm đam mê và nhiệt huyết của sinh viên Nguyễn Đắc Thành - B21DCCN678 lớp D21CQCN06-B thuộc PTIT. Chúc bạn trải nghiệm thú vị cùng với dự án IoT này!
