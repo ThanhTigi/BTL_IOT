@@ -56,15 +56,6 @@ function DataLedFan() {
         setTempInputPage(''); // Xóa ô nhập sau khi cập nhật
     };
 
-    const handleSearch = (dev) => {
-        setCurrentPage(1); // Reset về trang đầu khi tìm kiếm
-    };
-
-    const handleShowAll = () => {
-        setDeviceName(''); // Đặt lại tên thiết bị về rỗng để hiển thị tất cả
-        setCurrentPage(1); // Reset về trang đầu
-    };
-
     const handleDeleteData = () => {
         fetch(`http://localhost:8080/deleteAll`, {
             method: 'DELETE'

@@ -113,7 +113,7 @@ public class SensorController extends Controller {
     @GetMapping("/clear-sensor")
     public void clearSensor() throws SQLException {
         System.out.println("Clearing sensor data...");
-        String query = "DELETE FROM sensor WHERE 1 = 1";
+        String query = "DELETE FROM sensor";
         PreparedStatement ps = connection.prepareStatement(query);
         ps.executeUpdate();
         ps.close();

@@ -6,9 +6,6 @@ import Menu from '../menu/menu';
 import './dataSensor.css';
 
 function DataSensor() {
-    const client = mqtt.connect("wss://broker.hivemq.com:8884/mqtt");
-    const TOPIC_IOT_WEATHER = 'iot/weather';
-
     const [listDataSensor, setListDataSensor] = useState(null);
     const [totalPages, setTotalPages] = useState(1);
     const [currentPage, setCurrentPage] = useState(1);
@@ -19,7 +16,6 @@ function DataSensor() {
     const [humidityInput, setHumidityInput] = useState('');
     const [lightInput, setLightInput] = useState('');
     const [searchClicked, setSearchClicked] = useState(false);
-    const [isUpload, setIsUpload] = useState(false);
     const [isClear, setIsClear] = useState(false);
 
     useEffect(() => {

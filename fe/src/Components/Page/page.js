@@ -17,12 +17,6 @@ const urlFanOff = "fan_off.png";
 const urlAirOn = "/air_on.gif";
 const urlAirOff = "air_off.png";
 
-const TOPIC_IOT_WEATHER = 'iot/weather';
-const TOPIC_IOT_LED_FAN_AIR = 'iot/ledFanAir';
-const TOPIC_CONTROL_LED = 'control/led';
-const TOPIC_CONTROL_FAN = 'control/fan';
-const TOPIC_CONTROL_AIR = 'control/air';
-
 const Page = () => {
     // Khởi tạo các trạng thái cho đèn và quạt
     
@@ -193,8 +187,3 @@ const Page = () => {
     )
 }
 export default Page
-
-/*
-- MQTT: push từ web, sub từ arduino
-- Arduino: push nhiệt độ độ ẩm, 
-*/

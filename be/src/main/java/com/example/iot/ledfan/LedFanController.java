@@ -20,7 +20,7 @@ import java.util.Map;
 public class LedFanController extends Controller {
 
     @GetMapping("/fanlights")
-    public List<LedFan> getAllLedFans(Model model) {
+    public List<LedFan> getAllLedFans() {
         List<LedFan> ledFans = new ArrayList<>();
 
         try {
