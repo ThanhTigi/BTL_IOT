@@ -29,7 +29,7 @@
 
 1. **Cài Đặt Arduino IDE**.
 2. **Cài Đặt Thư Viện Cần Thiết** từ thư mục `embedded/lib`.
-3. **Mở Arduino IDE**, tạo một dự án mới và dán mã từ `sketch_aug18a.ino`.
+3. **Mở Arduino IDE**, tạo một dự án mới và dán mã từ `btl_mqtt_esp32.ino`.
 4. **Nạp mã lên ESP32**.
 
 ### 2. Thiết Lập Backend

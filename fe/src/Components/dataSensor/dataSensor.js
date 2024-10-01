@@ -1,7 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import moment from 'moment';
-import mqtt from 'precompiled-mqtt';
-import axios from 'axios';
 import Menu from '../menu/menu';
 import './dataSensor.css';
 

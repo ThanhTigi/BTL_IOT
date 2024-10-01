@@ -1,11 +1,9 @@
 import { useState, useEffect } from 'react';
-import axios from 'axios';
 import Charts from '../Chart/Charts';
 import Temperature from '../dht11/temperature';
 import Humidity from '../dht11/humidity';
 import Light from '../dht11/light';
 import Menu from '../menu/menu';
-import mqtt from 'precompiled-mqtt';
 import 'bootstrap-icons/font/bootstrap-icons.css';
 import './page.css'
 
@@ -136,13 +134,11 @@ const Page = () => {
                     <Temperature temperature={temperature} />
                     <Humidity humidity={humidity} />
                     <Light light={light} />
-                    {/* <Dust dust={dust} /> */}
                 </div>
 
                 <div className="page-btn">
                     <div className="page-bieudo">
                         <Charts thoitiet={[temperature, humidity, light]} />
-                        {/* <Chartdobui dobui={dust} ></Chartdobui> */}
                     </div>
 
                     <div className="page-btn-chucnang">
