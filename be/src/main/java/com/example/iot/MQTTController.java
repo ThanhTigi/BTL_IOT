@@ -23,7 +23,7 @@ public class MQTTController{
     private static String TOPIC_CONTROL_FAN = "control/fan";
     private static String TOPIC_CONTROL_AIR = "control/air";
     public static void Init() {
-        String broker = "tcp://192.168.43.105:1993"; // Địa chỉ broker MQTT
+        String broker = "tcp://192.168.249.105:1993"; // Địa chỉ broker MQTT
         String clientId = "JavaClient";
         String weatherTopic = "iot/weather";
 

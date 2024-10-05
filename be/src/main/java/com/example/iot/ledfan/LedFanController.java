@@ -42,21 +42,36 @@ public class LedFanController extends Controller {
         return ledFans;
     }
 
-    // Tìm kiếm thiết bị theo tên
+    // Sửa đổi phương thức tìm kiếm thiết bị theo tên
     @GetMapping("/fanlights/search")
-    public List<LedFan> searchLedFans(@RequestParam String deviceName) {
+    public List<LedFan> searchLedFans(@RequestParam(required = false) String deviceName, @RequestParam(required = false) String date) {
         List<LedFan> ledFans = new ArrayList<>();
         try {
-            String query = "SELECT * FROM ledFan WHERE name = ?";
+            String query = "SELECT * FROM ledFan WHERE 1=1"; // Khởi tạo câu truy vấn
+            if (deviceName != null && !deviceName.isEmpty()) {
+                query += " AND name = ?";
+            }
+            if (date != null && !date.isEmpty()) {
+                query += " AND DATE(date) = ?";
+            }
+
             PreparedStatement ps = connection.prepareStatement(query);
-            ps.setString(1, deviceName);
+
+            int index = 1;
+            if (deviceName != null && !deviceName.isEmpty()) {
+                ps.setString(index++, deviceName);
+            }
+            if (date != null && !date.isEmpty()) {
+                ps.setDate(index++, Date.valueOf(date));
+            }
+
             ResultSet rs = ps.executeQuery();
             while (rs.next()) {
                 int id = rs.getInt("id");
                 String name = rs.getString("name");
                 String status = rs.getString("status");
-                Timestamp date = rs.getTimestamp("date");
-                ledFans.add(new LedFan(id, name, status, date));
+                Timestamp recordDate = rs.getTimestamp("date");
+                ledFans.add(new LedFan(id, name, status, recordDate));
             }
             ps.close();
         } catch (Exception ex) {
@@ -65,6 +80,7 @@ public class LedFanController extends Controller {
 
         return ledFans;
     }
+
 
     public static LedFan addLedFan(LedFan ledFan) throws SQLException {
         ledFan.setDate(Timestamp.valueOf(LocalDateTime.now()));

@@ -90,3 +90,37 @@
 .btn-ok:hover {
   background-color: #218838;
 }
+
+.time-filter {
+  display: flex;
+  align-items: center;
+  justify-content: center; /* Căn giữa các phần tử */
+  gap: 15px; /* Khoảng cách giữa các phần tử */
+  margin: 20px auto; /* Căn giữa theo chiều ngang và thêm khoảng cách trên/dưới */
+  background-color: #f0f0f0;
+  padding: 15px 20px;
+  border-radius: 10px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  max-width: 500px; /* Giới hạn chiều rộng */
+}
+
+.time-filter-label {
+  font-size: 16px;
+  font-weight: 600;
+  color: #333;
+}
+
+.time-filter-input {
+  padding: 8px 12px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  font-size: 16px;
+  transition: border-color 0.3s, box-shadow 0.3s;
+  max-width: 200px; /* Giới hạn chiều rộng ô nhập */
+}
+
+.time-filter-input:focus {
+  border-color: #007bff;
+  box-shadow: 0 0 5px rgba(0, 123, 255, 0.3);
+  outline: none;
+}

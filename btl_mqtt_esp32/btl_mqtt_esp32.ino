@@ -18,7 +18,7 @@ const char* ssid = "TiGii";
 const char* password = "12345689";
 
 // MQTT Server
-const char *mqtt_broker = "192.168.43.105"; // Phong 192.168.1.244 DT 192.168.43.105
+const char *mqtt_broker = "192.168.249.105"; // Phong 192.168.1.244 DT 192.168.249.105
 const int mqtt_port = 1993;
 const char* mqtt_user = "thanh";  // Username MQTT
 const char* mqtt_pass = "678";  // Password MQTT

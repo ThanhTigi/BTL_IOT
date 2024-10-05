@@ -7,7 +7,7 @@ function DataSensor() {
     const [listDataSensor, setListDataSensor] = useState(null);
     const [totalPages, setTotalPages] = useState(1);
     const [currentPage, setCurrentPage] = useState(1);
-    const [tempInputPage, setTempInputPage] = useState(''); // Trạng thái nhập tạm thời cho số hàng mỗi trang
+    const [tempInputPage, setTempInputPage] = useState(20); // Trạng thái nhập tạm thời cho số hàng mỗi trang
     const [rowsPerPage, setRowsPerPage] = useState(20); // Trạng thái số hàng mỗi trang
 
     const [temperatureInput, setTemperatureInput] = useState('');
@@ -26,12 +26,12 @@ function DataSensor() {
                         item.id = index + 1; // Gán ID bắt đầu từ 1
                         item.date = moment(item.date).format('YYYY-MM-DD HH:mm:ss');
                     });
-    
+
                     setTotalPages(Math.ceil(data.length / rowsPerPage)); // Tính tổng số trang
                     const startIndex = (currentPage - 1) * rowsPerPage;
                     const endIndex = startIndex + rowsPerPage;
                     const slicedData = data.slice(startIndex, endIndex);
-                    
+
                     // Không cần sắp xếp lại vì ID đã được gán từ bé đến lớn
                     setListDataSensor(slicedData);
                 })
@@ -39,7 +39,7 @@ function DataSensor() {
                     console.error('Lỗi khi gửi yêu cầu API:', error);
                 });
         }
-    
+
         const interval = setInterval(callapi, 2000);
         return () => {
             clearInterval(interval);
@@ -85,13 +85,11 @@ function DataSensor() {
         }
     };
 
-    const handleUpdateRowsPerPage = () => {
-        const newRowsPerPage = parseInt(tempInputPage, 10);
+    const handleUpdateRowsPerPage = (newRowsPerPage) => {
         if (newRowsPerPage > 0) {
             setRowsPerPage(newRowsPerPage);
             setCurrentPage(1); // Reset về trang đầu
         }
-        setTempInputPage(''); // Xóa ô nhập sau khi cập nhật
     };
 
     return (
@@ -127,19 +125,8 @@ function DataSensor() {
                     <button className='btn-exit btn-exit-exit bi bi-card-list' onClick={() => handleExit()}> Tất cả</button>
                     <button className='btn-exit btn-exit-clear bi bi-trash' onClick={() => handleClear()}> Xóa dữ liệu</button>
                 </div>
-                {/* Ô nhập số hàng mỗi trang */}
-                <div className='rows-per-page'>
-                    <label htmlFor="rowsPerPageInput">Số hàng mỗi trang: </label>
-                    <input
-                        id="rowsPerPageInput"
-                        type="number"
-                        value={tempInputPage}
-                        onChange={(e) => setTempInputPage(e.target.value)}
-                        min="1"
-                    />
-                    <button className='btn-ok' onClick={handleUpdateRowsPerPage}>OK</button>
-                </div>
-    
+
+
                 {listDataSensor && (
                     <table>
                         <thead>
@@ -164,13 +151,35 @@ function DataSensor() {
                         </tbody>
                     </table>
                 )}
-    
-                
-    
+
+
+                {/* Ô chọn số hàng mỗi trang */}
+                <div className='rows-per-page'>
+                    <label htmlFor="rowsPerPageSelect">Số hàng mỗi trang: </label>
+                    <select
+                        id="rowsPerPageSelect"
+                        value={tempInputPage}
+                        onChange={(e) => {
+                            const newValue = parseInt(e.target.value);
+                            setTempInputPage(newValue);
+                            handleUpdateRowsPerPage(newValue);
+                        }}
+                        className="rows-per-page-select"
+                    >
+                        <option value={5}>5</option>
+                        <option value={10}>10</option>
+                        <option value={20}>20</option>
+                        <option value={30}>30</option>
+                        <option value={40}>40</option>
+                        <option value={50}>50</option>
+                    </select>
+                </div>
+
+
                 {/* Phân trang */}
                 <div className="pagination">
                     <button
-                        className='btn-truoc'
+                        className='btn-pagination btn-prev'
                         onClick={() => setCurrentPage(currentPage - 1)}
                         disabled={currentPage === 1}
                     >
@@ -184,7 +193,7 @@ function DataSensor() {
                             >
                                 1
                             </button>
-                            {currentPage > 3 && <span>...</span>}
+                            {currentPage > 3 && <span className="dots">...</span>}
                         </>
                     )}
                     {[...Array(totalPages)].map((_, index) => {
@@ -204,7 +213,7 @@ function DataSensor() {
                     })}
                     {currentPage < totalPages - 1 && (
                         <>
-                            {currentPage < totalPages - 2 && <span>...</span>}
+                            {currentPage < totalPages - 2 && <span className="dots">...</span>}
                             <button
                                 className={`page-number ${currentPage === totalPages ? 'active' : ''}`}
                                 onClick={() => setCurrentPage(totalPages)}
@@ -214,17 +223,18 @@ function DataSensor() {
                         </>
                     )}
                     <button
-                        className='btn-tiep'
+                        className='btn-pagination btn-next'
                         onClick={() => setCurrentPage(currentPage + 1)}
                         disabled={currentPage === totalPages}
                     >
                         Tiếp
                     </button>
                 </div>
+
             </div>
         </div>
     );
-    
+
 }
 
 export default DataSensor;
